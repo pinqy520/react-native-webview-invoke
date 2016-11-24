@@ -1,5 +1,7 @@
 'use strict';
 
+Object.defineProperty(exports, '__esModule', { value: true });
+
 var asyncToGenerator = function (fn) {
   return function () {
     var gen = fn.apply(this, arguments);
@@ -102,6 +104,13 @@ var set = function set(object, property, value, receiver) {
   return value;
 };
 
+var getUID = function () {
+    var counter = 0;
+    return function () {
+        return counter++;
+    };
+}();
+
 function createMessager(getWebviewInstance) {
     var _this = this;
 
@@ -177,4 +186,4 @@ function createMessager(getWebviewInstance) {
     };
 }
 
-module.exports = createMessager;
+exports.createMessager = createMessager;

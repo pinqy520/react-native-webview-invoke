@@ -25,8 +25,8 @@
     "url": "https://github.com/pinqy520/react-native-webview-messager/issues"
   },
   "files": [
-    "lib",
-    "dist"
+    "native.js",
+    "browser.js"
   ],
   "homepage": "https://github.com/pinqy520/react-native-webview-messager#readme",
   "dependencies": {},
