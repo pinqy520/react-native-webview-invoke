@@ -43,7 +43,7 @@ export function createMessager(sendHandler: (data: any) => void) {
     }
 
     function sender(data: PayloadStatic<any>) {
-
+        sendHandler(data)
     }
 
     async function send(command: string, data: any) {

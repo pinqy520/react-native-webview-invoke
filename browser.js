@@ -216,7 +216,9 @@ function createMessager(sendHandler) {
         delete callbacks[command];
     }
 
-    function sender(data) {}
+    function sender(data) {
+        sendHandler(data);
+    }
 
     return { send: send, on: on, off: off, listener: listener };
 }
