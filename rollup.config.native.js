@@ -12,8 +12,8 @@ export default {
     external: external,
     targets: [
         {
-            dest: 'native.js',
-            format: 'cjs'
+            dest: 'dist/native.js',
+            format: 'es'
         }
     ]
 };

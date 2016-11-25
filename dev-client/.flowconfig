@@ -1,10 +1,36 @@
 [ignore]
-<PROJECT_ROOT>/dev-client/
-<PROJECT_ROOT>/dev-web/
+
+# We fork some components by platform.
+.*/*[.]android.js
+
+# Ignore templates with `@flow` in header
+.*/local-cli/generator.*
+
+# Ignore malformed json
+.*/node_modules/y18n/test/.*\.json
+
+# Ignore the website subdir
+<PROJECT_ROOT>/website/.*
+
+# Ignore BUCK generated dirs
+<PROJECT_ROOT>/\.buckd/
+
+# Ignore unexpected extra @providesModule
+.*/node_modules/commoner/test/source/widget/share.js
+.*/node_modules/.*/node_modules/fbjs/.*
+
+# Ignore duplicate module providers
+# For RN Apps installed via npm, "Libraries" folder is inside node_modules/react-native but in the source repo it is in the root
+.*/Libraries/react-native/React.js
+.*/Libraries/react-native/ReactNative.js
+.*/node_modules/jest-runtime/build/__tests__/.*
 
 [include]
 
 [libs]
+node_modules/react-native/Libraries/react-native/react-native-interface.js
+node_modules/react-native/flow
+flow/
 
 [options]
 module.system=haste
@@ -28,3 +54,6 @@ suppress_comment=\\(.\\|\n\\)*\\$FlowIssue\\((\\(>=0\\.\\(3[0-3]\\|1[0-9]\\|[1-2
 suppress_comment=\\(.\\|\n\\)*\\$FlowFixedInNextDeploy
 
 unsafe.enable_getters_and_setters=true
+
+[version]
+^0.33.0

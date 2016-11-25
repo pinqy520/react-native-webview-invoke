@@ -1,8 +1,4 @@
-(function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-  typeof define === 'function' && define.amd ? define(['exports'], factory) :
-  (factory((global.WebViewMessager = global.WebViewMessager || {})));
-}(this, (function (exports) { 'use strict';
+'use strict';
 
 var asyncToGenerator = function (fn) {
   return function () {
@@ -33,7 +29,11 @@ var asyncToGenerator = function (fn) {
   };
 };
 
-
+var classCallCheck = function (instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+};
 
 
 
@@ -106,139 +106,135 @@ var set = function set(object, property, value, receiver) {
   return value;
 };
 
-var _this = undefined;
+var Deferred = function Deferred() {
+    var _this = this;
 
-var MessageTransaction = {};
+    classCallCheck(this, Deferred);
 
-var listeners = {};
-var listening = false;
-var onReadyCallbacks = [];
-
-function init() {
-    if (window['WebViewBridge'] && window['WebViewBridge'].addMessageListener && !listening) {
-        // console.log(JSON.stringify(window['WebViewBridge'], '\n', 2))
-        window['WebViewBridge'].addMessageListener(function (msg) {
-            for (var _key in listeners) {
-                listeners[_key](msg);
-            }
-        });
-        listening = true;
-        for (var i = 0; i < onReadyCallbacks.length; i++) {
-            onReadyCallbacks[i] && onReadyCallbacks[i]();
-        }
-        onReadyCallbacks = [];
-    }
-}
-
-function send(payload) {
-    if (window['WebViewBridge']) {
-        init();
-        window['WebViewBridge'].send(payload);
-    }
-}
-
-var WebviewMessageSender = function WebviewMessageSender(command, data) {
-    var id = getUID();
-    var key = command + '(' + id + ')';
-    var payload = {
-        command: command, id: id, data: data
-    };
-    return new Promise(function (resolve) {
-        MessageTransaction[key] = resolve;
-        send(payload);
+    this.promise = new Promise(function (resolve, reject) {
+        _this.resolve = resolve;
+        _this.reject = reject;
     });
 };
-var WebviewMessageListener = function WebviewMessageListener(processor) {
-    return function () {
-        var _ref = asyncToGenerator(regeneratorRuntime.mark(function _callee(payload) {
-            var _key2, resolver;
 
+var count = 0;
+
+function getUID() {
+    return count++;
+}
+
+var getTransactionKey = function getTransactionKey(data) {
+    return data.command + "(" + data.id + ")";
+};
+
+function createMessager(sendHandler) {
+    var send = function () {
+        var _ref = asyncToGenerator(regeneratorRuntime.mark(function _callee(command, data) {
+            var payload, defer;
             return regeneratorRuntime.wrap(function _callee$(_context) {
                 while (1) {
                     switch (_context.prev = _context.next) {
                         case 0:
-                            if (!window['WebViewBridge']) {
-                                _context.next = 12;
-                                break;
-                            }
+                            payload = {
+                                command: command, data: data, id: getUID(), reply: false
+                            };
+                            defer = new Deferred();
 
-                            if (!payload.reply) {
-                                _context.next = 7;
-                                break;
-                            }
+                            transactions[getTransactionKey(payload)] = defer;
+                            sender(payload);
+                            return _context.abrupt("return", defer.promise);
 
-                            _key2 = payload.command + '(' + payload.id + ')';
-                            resolver = MessageTransaction[_key2];
-
-                            if (resolver) {
-                                resolver(payload.data);
-                                delete MessageTransaction[_key2];
-                            }
-                            _context.next = 12;
-                            break;
-
-                        case 7:
-                            _context.next = 9;
-                            return processor(payload.command, payload.data);
-
-                        case 9:
-                            payload.data = _context.sent;
-
-                            payload.reply = true;
-                            send(payload);
-
-                        case 12:
-                        case 'end':
+                        case 5:
+                        case "end":
                             return _context.stop();
                     }
                 }
-            }, _callee, _this);
+            }, _callee, this);
         }));
 
-        return function (_x) {
+        return function send(_x, _x2) {
             return _ref.apply(this, arguments);
         };
     }();
-};
 
-var WebviewMessageListenerRegister = function WebviewMessageListenerRegister(key, fn) {
-    return listeners[key] = WebviewMessageListener(fn);
-};
+    var listener = function () {
+        var _ref2 = asyncToGenerator(regeneratorRuntime.mark(function _callee2(data) {
+            var _key, result;
 
-var WebviewMessageListenerUnregister = function WebviewMessageListenerUnregister(key) {
-    return delete listeners[key];
-};
+            return regeneratorRuntime.wrap(function _callee2$(_context2) {
+                while (1) {
+                    switch (_context2.prev = _context2.next) {
+                        case 0:
+                            if (!data.reply) {
+                                _context2.next = 5;
+                                break;
+                            }
 
-var WebviewMessageOnReady = function WebviewMessageOnReady(fn) {
-    if (listening) {
-        fn();
-    } else {
-        onReadyCallbacks.push(fn);
+                            _key = getTransactionKey(data);
+
+                            transactions[_key] && transactions[_key].resolve(data.data);
+                            _context2.next = 12;
+                            break;
+
+                        case 5:
+                            if (!callbacks[data.command]) {
+                                _context2.next = 12;
+                                break;
+                            }
+
+                            _context2.next = 8;
+                            return callbacks[data.command](data.data);
+
+                        case 8:
+                            result = _context2.sent;
+
+                            data.reply = true;
+                            data.data = result;
+                            sender(data);
+
+                        case 12:
+                        case "end":
+                            return _context2.stop();
+                    }
+                }
+            }, _callee2, this);
+        }));
+
+        return function listener(_x3) {
+            return _ref2.apply(this, arguments);
+        };
+    }();
+
+    var transactions = {};
+    var callbacks = {};
+
+    function on(command, fn) {
+        callbacks[command] = fn;
     }
-};
 
-var getUID = function () {
-    var counter = 0;
-    return function () {
-        return counter++;
-    };
-}();
+    function off(command, fn) {
+        delete callbacks[command];
+    }
 
-var messager = {
-    sender: WebviewMessageSender,
-    register: WebviewMessageListenerRegister,
-    unregister: WebviewMessageListenerUnregister,
-    onReady: WebviewMessageOnReady
-};
+    function sender(data) {}
 
-window.addEventListener('webviewbridge:init', function () {
-    init();
+    return { send: send, on: on, off: off, listener: listener };
+}
+
+var _createMessager = createMessager(function (data) {
+    return window.postMessage(JSON.stringify(data));
+});
+var send = _createMessager.send;
+var on = _createMessager.on;
+var off = _createMessager.off;
+var listener = _createMessager.listener;
+
+window.addEventListener('message', function (e) {
+    return listener(JSON.parse(e.data));
 });
 
-init();
+var browser = {
+    send: send, on: on, off: off
+};
 
-exports.messager = messager;
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-})));
+module.exports = browser;

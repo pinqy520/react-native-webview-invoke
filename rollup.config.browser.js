@@ -12,9 +12,13 @@ export default {
     external: external,
     targets: [
         {
-            dest: 'browser.js',
+            dest: 'dist/browser.js',
             format: 'umd',
             moduleName: 'WebViewMessager'
+        },
+        {
+            dest: 'browser.js',
+            format: 'cjs',
         }
     ]
 };
