@@ -1,5 +1,3 @@
-'use strict';
-
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -153,20 +151,21 @@ function createMessager(sendHandler) {
     return { send: send, on: on, off: off, listener: listener };
 }
 
-var _createMessager = createMessager(function (data) {
-    return window.postMessage(JSON.stringify(data));
+var native = (function (getWebview) {
+    var _createMessager = createMessager(function (data) {
+        return getWebview().postMessage(JSON.stringify(data));
+    }),
+        send = _createMessager.send,
+        on = _createMessager.on,
+        off = _createMessager.off,
+        handler = _createMessager.listener;
+
+    return {
+        send: send, on: on, off: off,
+        listener: function listener(e) {
+            return handler(JSON.parse(e.nativeEvent.data));
+        }
+    };
 });
-var send = _createMessager.send;
-var on = _createMessager.on;
-var off = _createMessager.off;
-var listener = _createMessager.listener;
 
-window.addEventListener('message', function (e) {
-    return listener(JSON.parse(e.data));
-});
-
-var browser = {
-    send: send, on: on, off: off
-};
-
-module.exports = browser;
+export default native;

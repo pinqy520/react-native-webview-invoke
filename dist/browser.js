@@ -1,4 +1,8 @@
-'use strict';
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+  typeof define === 'function' && define.amd ? define(factory) :
+  (global.WebViewMessager = factory());
+}(this, (function () { 'use strict';
 
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
@@ -169,4 +173,6 @@ var browser = {
     send: send, on: on, off: off
 };
 
-module.exports = browser;
+return browser;
+
+})));
