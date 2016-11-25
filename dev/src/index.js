@@ -6,6 +6,12 @@ import createMessager from './native.js'
 class Test extends React.Component {
     webview: WebView
     messager = createMessager(() => this.webview)
+    componentDidMount() {
+        this.messager.on('test', data => {
+            alert(data)
+            return 'hello web'
+        })
+    }
     render() {
         return (
             <View style={styles.container}>

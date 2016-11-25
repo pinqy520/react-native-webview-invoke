@@ -161,7 +161,7 @@ var on = _createMessager.on;
 var off = _createMessager.off;
 var listener = _createMessager.listener;
 
-window.addEventListener('message', function (e) {
+window.document.addEventListener('message', function (e) {
     return listener(JSON.parse(e.data));
 });
 

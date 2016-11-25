@@ -13,7 +13,9 @@
     <script src="http://localhost:8080/browser.js"></script>
     <script>
         (function () {
-            
+            setTimeout(function(){
+                window.WebViewMessager.send('test', 'hello rn').then(res => alert(res))
+            }, 2000)
         })()
     </script>
 </body>
