@@ -14,7 +14,7 @@ messager.on('ask', question => 'I don\'t know')
 
 ![rnwm](https://cloud.githubusercontent.com/assets/5719833/20641896/1fb6431c-b43d-11e6-83ec-3fe78e49220f.gif)
 
-## installation
+## Installation
 
 ```
 $ npm install react-native-webview-messager --save
@@ -24,11 +24,11 @@ Require
 
 - React Native >= 0.37
 
-## basic usage
+## Basic Usage
 
 There are two side of the lib
 
-### react-native side
+### React Native Side
 
 Import the `createMessager` function
 
@@ -52,7 +52,7 @@ class SomePage extends React.Component {
 
 ```
 
-### web side
+### Web Side
 
 Require
 
@@ -65,13 +65,4 @@ Or
 ``` html
 <script src="//example.com/rnwm-browser.js" ></script>
 ```
-
-
-
-
-
-
-
-
-
 
