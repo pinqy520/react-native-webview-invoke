@@ -8,14 +8,41 @@
 </head>
 
 <body>
-    just a webview message test
+    <p>Web Side:</p>
+    <p class="status">[Loading] Waiting for bridge ready</p>
+    <input class="input" type="text" placeholder="Some..." />
+    <button class="set" label="Send To RN">Send To RN</button>
+    <button class="get" label="Get From RN">Get From RN</button>
+
     <script src="http://cdn.bootcss.com/es6-promise/4.0.5/es6-promise.auto.min.js"></script>
     <script src="http://localhost:8080/browser.js"></script>
     <script>
         (function () {
+            var $input = document.querySelector('.input')
+            var $status = document.querySelector('.status')
             setTimeout(function(){
-                window.WebViewMessager.send('test', 'hello rn').then(res => alert(res))
+                window.WebViewMessager.send('init')
+                $status.innerText = '[Ready] Done!'
             }, 2000)
+            window.WebViewMessager.on('get', function(data) {
+                return $input.value
+            })
+            window.WebViewMessager.on('set', function(data) {
+                $status.innerText = '[Receive From RN] "' + data + '"'
+            })
+            document.querySelector('.set').addEventListener('click', function(){
+                $status.innerText = '[Set To RN] Sending'
+                window.WebViewMessager.send('set', $input.value)
+                    .then(function () {
+                        $status.innerText = '[Set To RN] Success'
+                    })
+            })
+            document.querySelector('.get').addEventListener('click', function(){
+                window.WebViewMessager.send('get')
+                    .then(function (data) {
+                        $status.innerText = '[Get From RN] "' + data + '"'
+                    })
+            })
         })()
     </script>
 </body>
