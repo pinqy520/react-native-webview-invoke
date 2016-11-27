@@ -102,13 +102,13 @@ const name = await messager.send('what is your', 'name')
 | arg | type | description |
 | -- | -- | -- |
 | command | `string` | command |
-| callback | `(payload: any) => any | Promise<any>` | command handler |
 
 
 ### off(command)
 
 > unbind a command
 
+---
 
 | arg | type | description |
 | -- | -- | -- |
