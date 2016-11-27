@@ -99,38 +99,40 @@ const name = await messager.send('what is your', 'name')
 
 > bind a command handler
 
-| arg | type | description |
-| -- | -- | -- |
-| command | `string` | command |
+Args:
+
+- command [`string`]
+- callback [`(payload: any) => any | Promise<any>`] 
 
 
 ### off(command)
 
 > unbind a command
 
----
+Args:
 
-| arg | type | description |
-| -- | -- | -- |
-| command | `string` | command |
+- command [`string`]
 
 ### send(command, payload)
 
 > send a message to another side
 
+Args:
 
-| arg | type | description |
-| -- | -- | -- |
-| command | `string` | command |
-| payload | `any` | payload data |
+- command [`string`]
+- payload [`any`]
+
+Return
+
+- [`Promise<any>`]
 
 ### listener(evt)
 
 > onMessage handler for WebView component (only at the native side)
 
-| arg | type | description |
-| -- | -- | -- |
-| evt | `nativeEvent` | event |
+Args:
+
+- evt [`nativeEvent`]
 
 Example:
 
@@ -141,13 +143,4 @@ Example:
 ## Custom Usage (TODO)
 
 `react-native-webview-messager` also provide a factory function for creating custom messager in other webview bridge lib like `react-native-webview-bridge`
-
-
-
-
-
-
-
-
-
 
