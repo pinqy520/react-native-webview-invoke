@@ -28,7 +28,7 @@ Require
 
 There are two side of the lib
 
-### React Native Side
+### React Native Side Import
 
 Import the `createMessager` function
 
@@ -40,21 +40,22 @@ Init the `messager`
 
 ``` javascript
 class SomePage extends React.Component {
-  webview
-  messager = createMessager(() => this.webview)
-  render() {
-    return <Webview
-      ref={webview => this.webview = webview}
-      onMessage={this.messager.listener}
-    />	
+    webview: WebView
+    messager = createMessager(() => this.webview)
+    render() {
+        return <Webview
+            ref={webview => this.webview = webview}
+            onMessage={this.messager.listener}
+            source={require('./index.html')}
+        />	
   }
 }
 
 ```
 
-### Web Side
+### Web Side Import 
 
-Require
+Import the `messager`
 
 ``` javascript
 import messager from 'react-native-webview-messager/browser'
@@ -63,6 +64,88 @@ import messager from 'react-native-webview-messager/browser'
 Or 
 
 ``` html
-<script src="//example.com/rnwm-browser.js" ></script>
+<script src="./node_modules/react-native-webview-messager/browser.js"></script>
+<script>
+var messager = window.WebViewMessager
+</script>
 ```
+
+
+### Start
+
+One side
+
+``` javascript
+// registry a listener
+const me = { name: 'NO.19', nickname: 'Jack' }
+const thinking = () => new Promise(resolve => setTimeout(resolve, 2000))
+messager.on('what is your', async (q) => {
+    await thinking()
+    return me[q] || 'I don\'t know'
+}) 
+```
+
+Another side
+
+``` javascript
+const name = await messager.send('what is your', 'name')
+// 'NO.19'
+```
+
+
+## API
+
+### on(command, callback)
+
+> bind a command handler
+
+| arg | type | description |
+| -- | -- | -- |
+| command | `string` | command |
+| callback | `(payload: any) => any | Promise<any>` | command handler |
+
+
+### off(command)
+
+> unbind a command
+
+| arg | type | description |
+| -- | -- | -- |
+| command | `string` | command |
+
+### send(command, payload)
+
+> send a message to another side
+
+| arg | type | description |
+| -- | -- | -- |
+| command | `string` | command |
+| payload | `any` | payload data |
+
+### listener(evt)
+
+> onMessage handler for WebView component (only at the native side)
+
+| arg | type | description |
+| -- | -- | -- |
+| evt | `nativeEvent` | event |
+
+Example:
+
+``` javascript
+<WebView onMessage={messager.listener} />
+```
+
+## Custom Usage (TODO)
+
+`react-native-webview-messager` also provide a factory function for creating custom messager in other webview bridge lib like `react-native-webview-bridge`
+
+
+
+
+
+
+
+
+
 
