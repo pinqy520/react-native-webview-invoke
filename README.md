@@ -109,6 +109,7 @@ const name = await messager.send('what is your', 'name')
 
 > unbind a command
 
+
 | arg | type | description |
 | -- | -- | -- |
 | command | `string` | command |
@@ -116,6 +117,7 @@ const name = await messager.send('what is your', 'name')
 ### send(command, payload)
 
 > send a message to another side
+
 
 | arg | type | description |
 | -- | -- | -- |
