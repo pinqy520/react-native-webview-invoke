@@ -1,5 +1,7 @@
 # react-native-webview-messager
 
+[![npm version](https://badge.fury.io/js/react-native-webview-messager.svg)](https://badge.fury.io/js/react-native-webview-messager)
+
 > react-native-webview-messager provides a useful API using async / await for easier communicating with react native webview. 
 
 Jusk like:
