@@ -158,7 +158,7 @@ import messagerFactory from 'react-native-webview-messager/factory'
 
 class Test extends React.Component {
     webview: WebViewBridge
-    messager = messagerFactory((v) => this.webview.send(v))
+    messager = messagerFactory((v) => this.webview.sendToBridge(v))
     render() {
         return (
             <WebViewBridge
@@ -176,11 +176,22 @@ Web Side:
 
 ``` javascript 
 import messagerFactory from 'react-native-webview-messager/factory'
+
+const messager = messagerFactory(v => window.WebViewBridge(v))
+
+window.WebViewBridge.addMessageListener(messager.listener)
 ```
 
 
+## Factory API
 
+## messagerFactory(sender)
 
+> Create a messager
+
+ Args
+ 
+- sender [`(data: any) => void`] define how to send a message object
 
 
 
