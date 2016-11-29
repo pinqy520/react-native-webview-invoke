@@ -1,6 +1,6 @@
 {
   "name": "react-native-webview-messager",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Easer async/await based messager for react native webview",
   "main": "index.js",
   "scripts": {
