@@ -1,6 +1,5 @@
 [ignore]
-<PROJECT_ROOT>/dev-client/
-<PROJECT_ROOT>/dev-web/
+<PROJECT_ROOT>/dev/
 
 [include]
 

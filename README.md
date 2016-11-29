@@ -140,7 +140,50 @@ Example:
 <WebView onMessage={messager.listener} />
 ```
 
-## Custom Usage (TODO)
+## Custom Usage
 
-`react-native-webview-messager` also provide a factory function for creating custom messager in other webview bridge lib like `react-native-webview-bridge`
+`react-native-webview-messager` also provide a factory function for creating custom messager in other webview bridge lib like [react-native-webview-bridge](https://github.com/alinz/react-native-webview-bridge)
+
+``` javascript
+import messagerFactory from 'react-native-webview-messager/factory'
+```
+
+Use `react-native-webview-bridge#v2` as an example.
+
+React Native Side:
+
+``` javascript
+import { WebViewBridge } from 'react-native-webview-bridge'
+import messagerFactory from 'react-native-webview-messager/factory'
+
+class Test extends React.Component {
+    webview: WebViewBridge
+    messager = messagerFactory((v) => this.webview.send(v))
+    render() {
+        return (
+            <WebViewBridge
+                ref={w => this.webview = w}
+                onMessage={this.messager.listener}
+            />
+        )
+    }
+
+}
+
+```
+
+Web Side:
+
+``` javascript 
+import messagerFactory from 'react-native-webview-messager/factory'
+```
+
+
+
+
+
+
+
+
+
 
