@@ -89,7 +89,7 @@ var invoke = window.WebViewInvoke
 
 For better illumination, we define two sides named `A` and `B`. each of them can be React Native or Web, and if `A` is React Native, then `B` is Web.
 
-Resume that there are some functions in A side.
+Assume that there are some functions in A side.
 
 ``` javascript
 function whatIsTheNameOfA() {
@@ -101,7 +101,7 @@ function tellAYouArea(someone: string, prefix: string) {
 }
 ```
 
-Expose their for B side.
+Expose them for B side.
 
 ``` javascript
 invoke
