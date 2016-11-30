@@ -75,6 +75,30 @@ var set = function set(object, property, value, receiver) {
   return value;
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var toConsumableArray = function (arr) {
+  if (Array.isArray(arr)) {
+    for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
+
+    return arr2;
+  } else {
+    return Array.from(arr);
+  }
+};
+
 var Deferred = function Deferred() {
     var _this = this;
 
@@ -101,14 +125,24 @@ function createMessager(sendHandler) {
     var transactions = {};
     var callbacks = {};
 
-    function on(command, fn) {
-        callbacks[command] = fn;
+    function bind(name) {
+        return function () {
+            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+                args[_key] = arguments[_key];
+            }
+
+            return send(name, args);
+        };
     }
 
-    function off(command, fn) {
-        delete callbacks[command];
+    function define(name, fn) {
+        callbacks[name] = function (args) {
+            return fn.apply(undefined, toConsumableArray(args));
+        };
+        return { define: define, bind: bind };
     }
 
+    /** sender parts */
     function sender(data) {
         sendHandler(data);
     }
@@ -128,11 +162,11 @@ function createMessager(sendHandler) {
         data.data = result;
         sender(data);
     }
-
+    /** listener parts */
     function listener(data) {
         if (data.reply) {
-            var _key = getTransactionKey(data);
-            transactions[_key] && transactions[_key].resolve(data.data);
+            var _key2 = getTransactionKey(data);
+            transactions[_key2] && transactions[_key2].resolve(data.data);
         } else {
             if (callbacks[data.command]) {
                 var result = callbacks[data.command](data.data);
@@ -148,20 +182,19 @@ function createMessager(sendHandler) {
             }
         }
     }
-    return { send: send, on: on, off: off, listener: listener };
+    return { bind: bind, define: define, listener: listener };
 }
 
 var native = (function (getWebview) {
     var _createMessager = createMessager(function (data) {
         return getWebview().postMessage(JSON.stringify(data));
     }),
-        send = _createMessager.send,
-        on = _createMessager.on,
-        off = _createMessager.off,
+        bind = _createMessager.bind,
+        define = _createMessager.define,
         handler = _createMessager.listener;
 
     return {
-        send: send, on: on, off: off,
+        bind: bind, define: define,
         listener: function listener(e) {
             return handler(JSON.parse(e.nativeEvent.data));
         }

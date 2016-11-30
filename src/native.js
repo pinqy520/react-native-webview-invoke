@@ -3,11 +3,11 @@
 import { createMessager } from './messager/index'
 
 export default (getWebview: () => any) => {
-    const { send, on, off, listener: handler } = createMessager(
+    const { bind, define, listener: handler } = createMessager(
         (data: any) => getWebview().postMessage(JSON.stringify(data))
     )
     return {
-        send, on, off,
+        bind, define,
         listener: (e: any) => handler(JSON.parse(e.nativeEvent.data))
     }
 }

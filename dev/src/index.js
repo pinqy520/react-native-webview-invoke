@@ -10,34 +10,38 @@ class Test extends React.Component {
     }
     webview: WebView
     messager = createMessager(() => this.webview)
+    setWebValue = this.messager.bind('set')
+    getWebValue = this.messager.bind('get')
+    webInitialize = () => {
+        this.setState({
+            status: '[Ready] Done!'
+        })
+    }
+    webWannaGet = () => this.state.value
+    webWannaSet = (data) => {
+        this.setState({
+            status: `[Receive From Web] '${data}'`
+        })
+    }
     handleChange = (value: string) => {
         this.setState({ value })
     }
     handleGet = async () => {
-        const info = await this.messager.send('get')
+        const info = await this.getWebValue()
         this.setState({
             status: `[Get From Web] '${info}'`
         })
     }
     handleSet = async () => {
         this.setState({ status: '[Set To Web] Sending' })
-        await this.messager.send('set', this.state.value)
+        await this.setWebValue(this.state.value)
         this.setState({ status: '[Set To Web] Success' })
     }
     componentDidMount() {
-        this.messager.on('init', data => {
-            this.setState({
-                status: '[Ready] Done!'
-            })
-        })
-        this.messager.on('get', data => {
-            return this.state.value
-        })
-        this.messager.on('set', data => {
-            this.setState({
-                status: `[Receive From Web] '${data}'`
-            })
-        })
+        this.messager
+            .define('init', this.webInitialize)
+            .define('get', this.webWannaGet)
+            .define('set', this.webWannaSet)
     }
     renderWebSide() {
         return (

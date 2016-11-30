@@ -25,7 +25,7 @@ function getUID() {
     return count++
 }
 
-type callbackStatic = (data: any) => any
+type callbackStatic = (...data: any) => any
 
 const getTransactionKey = (data: PayloadStatic<any>) => `${data.command}(${data.id})`
 
@@ -34,14 +34,16 @@ export function createMessager(sendHandler: (data: any) => void) {
     const transactions: { [key: string]: Deferred } = {}
     const callbacks: { [key: string]: callbackStatic } = {}
 
-    function on(command: string, fn: callbackStatic) {
-        callbacks[command] = fn
+    function bind<TArgs, TReturn>(name: string) {
+        return (...args: any): Promise<TReturn> => send(name, args)
     }
 
-    function off(command: string, fn: callbackStatic) {
-        delete callbacks[command]
+    function define(name: string, fn: callbackStatic) {
+        callbacks[name] = (args: any) => fn(...args)
+        return { define, bind }
     }
 
+    /** sender parts */
     function sender(data: PayloadStatic<any>) {
         sendHandler(data)
     }
@@ -61,7 +63,7 @@ export function createMessager(sendHandler: (data: any) => void) {
         data.data = result
         sender(data)
     }
-
+    /** listener parts */
     function listener(data: PayloadStatic<any>) {
         if (data.reply) {
             const key = getTransactionKey(data)
@@ -79,5 +81,5 @@ export function createMessager(sendHandler: (data: any) => void) {
             }
         }
     }
-    return { send, on, off, listener }
+    return { bind, define, listener }
 }

@@ -40,25 +40,32 @@
         (function () {
             var $input = document.querySelector('.input')
             var $status = document.querySelector('.status')
+            
+            var getFromNative = window.WebViewMessager.bind('get')
+            var setToNative = window.WebViewMessager.bind('set')
+            var webReady = window.WebViewMessager.bind('init')
+            function nativeWannaGet() {
+                return $input.value
+            }
+            function nativeWannaSet(data) {
+                $status.innerText = '[Receive From RN] "' + data + '"'
+            }
+            window.WebViewMessager.define('get', nativeWannaGet)
+            window.WebViewMessager.define('set', nativeWannaSet)
             setTimeout(function(){
-                window.WebViewMessager.send('init')
+                webReady()
                 $status.innerText = '[Ready] Done!'
             }, 2000)
-            window.WebViewMessager.on('get', function(data) {
-                return $input.value
-            })
-            window.WebViewMessager.on('set', function(data) {
-                $status.innerText = '[Receive From RN] "' + data + '"'
-            })
+
             document.querySelector('.set').addEventListener('click', function(){
                 $status.innerText = '[Set To RN] Sending'
-                window.WebViewMessager.send('set', $input.value)
+                setToNative($input.value)
                     .then(function () {
                         $status.innerText = '[Set To RN] Success'
                     })
             })
             document.querySelector('.get').addEventListener('click', function(){
-                window.WebViewMessager.send('get')
+                getFromNative()
                     .then(function (data) {
                         $status.innerText = '[Get From RN] "' + data + '"'
                     })
