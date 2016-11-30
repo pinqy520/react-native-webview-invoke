@@ -1,7 +1,7 @@
 {
-  "name": "react-native-webview-messager",
+  "name": "react-native-webview-invoke",
   "version": "0.0.2",
-  "description": "Easer async/await based messager for react native webview",
+  "description": "Invoke functions between React Native and WebView directly",
   "main": "index.js",
   "scripts": {
     "build:native": "rollup --config rollup.config.native.js",
@@ -11,25 +11,27 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pinqy520/react-native-webview-messager.git"
+    "url": "git+https://github.com/pinqy520/react-native-webview-invoke.git"
   },
   "keywords": [
     "react-native",
     "webview",
     "messager",
-    "react-native-webview-messager",
+    "invoke",
+    "react-native-webview-invoke",
     "hybrid"
   ],
   "author": "Huang Qi",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/pinqy520/react-native-webview-messager/issues"
+    "url": "https://github.com/pinqy520/react-native-webview-invoke/issues"
   },
   "files": [
     "native.js",
-    "browser.js"
+    "browser.js",
+    "factory.js"
   ],
-  "homepage": "https://github.com/pinqy520/react-native-webview-messager#readme",
+  "homepage": "https://github.com/pinqy520/react-native-webview-invoke#readme",
   "dependencies": {},
   "devDependencies": {
     "babel-plugin-external-helpers": "latest",

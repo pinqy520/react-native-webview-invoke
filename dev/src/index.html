@@ -41,17 +41,17 @@
             var $input = document.querySelector('.input')
             var $status = document.querySelector('.status')
             
-            var getFromNative = window.WebViewMessager.bind('get')
-            var setToNative = window.WebViewMessager.bind('set')
-            var webReady = window.WebViewMessager.bind('init')
+            var getFromNative = window.WebViewInvoke.bind('get')
+            var setToNative = window.WebViewInvoke.bind('set')
+            var webReady = window.WebViewInvoke.bind('init')
             function nativeWannaGet() {
                 return $input.value
             }
             function nativeWannaSet(data) {
                 $status.innerText = '[Receive From RN] "' + data + '"'
             }
-            window.WebViewMessager.define('get', nativeWannaGet)
-            window.WebViewMessager.define('set', nativeWannaSet)
+            window.WebViewInvoke.define('get', nativeWannaGet)
+            window.WebViewInvoke.define('set', nativeWannaSet)
             setTimeout(function(){
                 webReady()
                 $status.innerText = '[Ready] Done!'

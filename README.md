@@ -1,17 +1,25 @@
-# react-native-webview-messager
+# react-native-webview-invoke
 
-[![npm version](https://badge.fury.io/js/react-native-webview-messager.svg)](https://badge.fury.io/js/react-native-webview-messager)
+> Invoke functions between React Native and WebView directly
 
-> react-native-webview-messager provides a useful API using async / await for easier communicating with react native webview. 
-
-Jusk like:
+Just like: 
 
 ``` javascript
-// one side
-const answer = await messager.send('ask', question) 
+// Side A
+const answer = await ask(question) 
 
-// another side
-messager.on('ask', question => 'I don\'t know')
+// Side B
+function ask(question) { return 'I don\'t know' }
+```
+
+Before using like that, you should firstly define the function you want to expose.
+
+``` javascript
+// Side A
+const ask = invoke.bind('ask')
+
+// Side B
+invoke.define('ask', ask)
 ```
 
 ![rnwm](https://cloud.githubusercontent.com/assets/5719833/20641896/1fb6431c-b43d-11e6-83ec-3fe78e49220f.gif)
@@ -19,183 +27,158 @@ messager.on('ask', question => 'I don\'t know')
 ## Installation
 
 ```
-$ npm install react-native-webview-messager --save
+$ npm install react-native-webview-invoke --save
 ```
 
-Require
+Requires：
 
 - React Native >= 0.37
 
 ## Basic Usage
 
-There are two side of the lib
+There are two sides: native and web.
 
-### React Native Side Import
+### React Native Side
 
-Import the `createMessager` function
+Import
 
 ``` javascript
-import createMessager from 'react-native-webview-messager/native'
+import createInvoke from 'react-native-webview-messager/native'
 ```
 
-Init the `messager`
+Create `invoke`
 
 ``` javascript
 class SomePage extends React.Component {
     webview: WebView
-    messager = createMessager(() => this.webview)
+    invoke = createInvoke(() => this.webview)
     render() {
         return <Webview
             ref={webview => this.webview = webview}
-            onMessage={this.messager.listener}
+            onMessage={this.invoke.listener}
             source={require('./index.html')}
-        />	
-  }
+            />
+    }
 }
-
 ```
 
-### Web Side Import 
+Now, we can start to expose functions for Web, and get the function from Web. (See Start to use)
 
-Import the `messager`
+### Web Side
+
+Import
 
 ``` javascript
-import messager from 'react-native-webview-messager/browser'
+import invoke from 'react-native-webview-messager/browser'
 ```
 
-Or 
+Or use `<script>` in `.html`
 
 ``` html
-<script src="./node_modules/react-native-webview-messager/browser.js"></script>
+<script src="./node_modules/react-native-webview-invoke/browser.js"></script>
 <script>
-var messager = window.WebViewMessager
+var invoke = window.WebViewInvoke
 </script>
 ```
 
+### Start to use
 
-### Start
+For better illumination, we define two sides named `A` and `B`. each of them can be React Native or Web, and if `A` is React Native, then `B` is Web.
 
-One side
-
-``` javascript
-// registry a listener
-const me = { name: 'NO.19', nickname: 'Jack' }
-const thinking = () => new Promise(resolve => setTimeout(resolve, 2000))
-messager.on('what is your', async (q) => {
-    await thinking()
-    return me[q] || 'I don\'t know'
-}) 
-```
-
-Another side
+Resume that there are some functions in A side.
 
 ``` javascript
-const name = await messager.send('what is your', 'name')
-// 'NO.19'
+function whatIsTheNameOfA() {
+    return 'A'
+}
+
+function tellAYouArea(someone: string, prefix: string) {
+    return 'Hi, ' + prefix + someone + '!'
+}
 ```
 
+Expose their for B side.
+
+``` javascript
+invoke
+    .define('whatIsTheNameOfA', whatIsTheNameOfA)
+    .define('tellAYouArea', tellAYouArea)
+```
+
+---
+
+OK, Go to the B side:
+
+Firstly, bind some functions which exposed from `A`.
+
+``` javascript
+const whatIsTheNameOfA = invoke.bind('whatIsTheNameOfA')
+const tellAYouArea = invoke.bind('tellAYouArea')
+```
+
+Now, we can use them.
+
+``` javascript
+await whatIsTheNameOfA()
+// 'A'
+await tellAYouArea('B', 'Mr.')
+// 'Hi, Mr.B'
+```
+
+In addition, you can use them without definition too. (unrecomendation)
+
+``` javascript
+await invoke.fn.whatIsTheNameOfA()
+// 'A'
+await invoke.fn.tellAYouArea('B', 'Mr.')
+// 'Hi, Mr.B'
+```
 
 ## API
 
-### on(command, callback)
+### `createInvoke(getWebViewInstance)`
 
-> bind a command handler
-
-Args:
-
-- command [`string`]
-- callback [`(payload: any) => any | Promise<any>`] 
-
-
-### off(command)
-
-> unbind a command
+> (RN only) create `invoke` with the `Webview` instance.
 
 Args:
 
-- command [`string`]
+- getWebViewInstance [`() => React.WebView`] getter for `Webview` instance
 
-### send(command, payload)
+Return:
 
-> send a message to another side
+- invoke [`invoke`] invoke object
 
-Args:
+### `invoke.define(name, fn)`
 
-- command [`string`]
-- payload [`any`]
-
-Return
-
-- [`Promise<any>`]
-
-### listener(evt)
-
-> onMessage handler for WebView component (only at the native side)
+> expose function to another side.
 
 Args:
 
-- evt [`nativeEvent`]
+- name [`string`] function name
+- fn [`Function`] 
 
-Example:
+### `invoke.bind(name)`
+
+> get function from another side
+
+Args:
+
+- name [`string`] function name
+
+Return:
+
+[`(...args: any[]) => Promise<any>`] function
+
+
+### `invoke.listener`
+
+> (RN only) the handler for the `onMessage` property of `WebView` element.
+
+Usage:
 
 ``` javascript
-<WebView onMessage={messager.listener} />
+<WebView onMessage={invoke.listener} />
 ```
-
-## Custom Usage
-
-`react-native-webview-messager` also provide a factory function for creating custom messager in other webview bridge lib like [react-native-webview-bridge](https://github.com/alinz/react-native-webview-bridge)
-
-``` javascript
-import messagerFactory from 'react-native-webview-messager/factory'
-```
-
-Use `react-native-webview-bridge#v2` as an example.
-
-React Native Side:
-
-``` javascript
-import { WebViewBridge } from 'react-native-webview-bridge'
-import messagerFactory from 'react-native-webview-messager/factory'
-
-class Test extends React.Component {
-    webview: WebViewBridge
-    messager = messagerFactory((v) => this.webview.sendToBridge(v))
-    render() {
-        return (
-            <WebViewBridge
-                ref={w => this.webview = w}
-                onMessage={this.messager.listener}
-            />
-        )
-    }
-
-}
-
-```
-
-Web Side:
-
-``` javascript 
-import messagerFactory from 'react-native-webview-messager/factory'
-
-const messager = messagerFactory(v => window.WebViewBridge(v))
-
-window.WebViewBridge.addMessageListener(messager.listener)
-```
-
-
-## Factory API
-
-## messagerFactory(sender)
-
-> Create a messager
-
- Args
- 
-- sender [`(data: any) => void`] define how to send a message object
-
-
 
 
 

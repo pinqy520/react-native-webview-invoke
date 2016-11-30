@@ -1,7 +1,7 @@
 // @flow
 import * as React from 'react'
 import { View, Text, TextInput, TouchableOpacity, WebView, AppRegistry } from 'react-native'
-import createMessager from './native.js'
+import createInvoke from './native.js'
 
 class Test extends React.Component {
     state = {
@@ -9,9 +9,9 @@ class Test extends React.Component {
         value: ''
     }
     webview: WebView
-    messager = createMessager(() => this.webview)
-    setWebValue = this.messager.bind('set')
-    getWebValue = this.messager.bind('get')
+    invoke = createInvoke(() => this.webview)
+    setWebValue = this.invoke.bind('set')
+    getWebValue = this.invoke.bind('get')
     webInitialize = () => {
         this.setState({
             status: '[Ready] Done!'
@@ -38,7 +38,7 @@ class Test extends React.Component {
         this.setState({ status: '[Set To Web] Success' })
     }
     componentDidMount() {
-        this.messager
+        this.invoke
             .define('init', this.webInitialize)
             .define('get', this.webWannaGet)
             .define('set', this.webWannaSet)
@@ -48,7 +48,7 @@ class Test extends React.Component {
             <View style={styles.webviewArea}>
                 <WebView
                     ref={webview => this.webview = webview}
-                    onMessage={this.messager.listener}
+                    onMessage={this.invoke.listener}
                     source={require('./index.html')}
                     />
             </View>

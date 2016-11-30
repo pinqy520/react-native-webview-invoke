@@ -14,7 +14,7 @@ export default {
         {
             dest: 'dist/browser.js',
             format: 'umd',
-            moduleName: 'WebViewMessager'
+            moduleName: 'WebViewInvoke'
         },
         {
             dest: 'browser.js',
