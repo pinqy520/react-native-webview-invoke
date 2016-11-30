@@ -1,1 +1,1 @@
-console.error('please use "react-native-webview-messager/native" or "react-native-webview-messager/browser"')
+console.error('please use "react-native-webview-invoke/native" or "react-native-webview-invoke/browser"')
