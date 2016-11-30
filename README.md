@@ -1,5 +1,9 @@
 # react-native-webview-invoke
 
+[中文文档](https://github.com/pinqy520/react-native-webview-invoke/wiki/%E4%B8%AD%E6%96%87%E6%96%87%E6%A1%A3)
+
+[![npm version](https://badge.fury.io/js/react-native-webview-invoke.svg)](https://badge.fury.io/js/react-native-webview-invoke)
+
 > Invoke functions between React Native and WebView directly
 
 Just like: 
