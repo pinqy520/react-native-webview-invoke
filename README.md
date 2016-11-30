@@ -47,7 +47,7 @@ There are two sides: native and web.
 Import
 
 ``` javascript
-import createInvoke from 'react-native-webview-messager/native'
+import createInvoke from 'react-native-webview-invoke/native'
 ```
 
 Create `invoke`
@@ -73,7 +73,7 @@ Now, we can start to expose functions for Web, and get the function from Web. (S
 Import
 
 ``` javascript
-import invoke from 'react-native-webview-messager/browser'
+import invoke from 'react-native-webview-invoke/browser'
 ```
 
 Or use `<script>` in `.html`
