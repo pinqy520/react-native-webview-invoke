@@ -10,8 +10,6 @@ class Test extends React.Component {
     }
     webview: WebView
     invoke = createInvoke(() => this.webview)
-    setWebValue = this.invoke.bind('set')
-    getWebValue = this.invoke.bind('get')
     webInitialize = () => {
         this.setState({
             status: '[Ready] Done!'
@@ -27,14 +25,14 @@ class Test extends React.Component {
         this.setState({ value })
     }
     handleGet = async () => {
-        const info = await this.getWebValue()
+        const info = await this.invoke.fn.get()
         this.setState({
             status: `[Get From Web] '${info}'`
         })
     }
     handleSet = async () => {
         this.setState({ status: '[Set To Web] Sending' })
-        await this.setWebValue(this.state.value)
+        await this.invoke.fn.set(this.state.value)
         this.setState({ status: '[Set To Web] Success' })
     }
     componentDidMount() {

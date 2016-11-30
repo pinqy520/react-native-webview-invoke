@@ -18,7 +18,7 @@ var classCallCheck = function (instance, Constructor) {
 
 
 
-var get = function get(object, property, receiver) {
+var get$1 = function get$1(object, property, receiver) {
   if (object === null) object = Function.prototype;
   var desc = Object.getOwnPropertyDescriptor(object, property);
 
@@ -28,7 +28,7 @@ var get = function get(object, property, receiver) {
     if (parent === null) {
       return undefined;
     } else {
-      return get(parent, property, receiver);
+      return get$1(parent, property, receiver);
     }
   } else if ("value" in desc) {
     return desc.value;
@@ -59,14 +59,14 @@ var get = function get(object, property, receiver) {
 
 
 
-var set = function set(object, property, value, receiver) {
+var set$1 = function set$1(object, property, value, receiver) {
   var desc = Object.getOwnPropertyDescriptor(object, property);
 
   if (desc === undefined) {
     var parent = Object.getPrototypeOf(object);
 
     if (parent !== null) {
-      set(parent, property, value, receiver);
+      set$1(parent, property, value, receiver);
     }
   } else if ("value" in desc && desc.writable) {
     desc.value = value;
@@ -123,13 +123,17 @@ function getUID() {
 }
 
 var getTransactionKey = function getTransactionKey(data) {
-    return data.command + "(" + data.id + ")";
+    return data.command + '(' + data.id + ')';
 };
 
+var SYNC_COMMAND = 'RNWV:sync';
+
 function createMessager(sendHandler) {
+    var needWait = [];
 
     var transactions = {};
     var callbacks = {};
+    var fn = {};
 
     function bind(name) {
         return function () {
@@ -141,16 +145,31 @@ function createMessager(sendHandler) {
         };
     }
 
-    function define(name, fn) {
+    function define(name, func) {
         callbacks[name] = function (args) {
-            return fn.apply(undefined, toConsumableArray(args));
+            return func.apply(undefined, toConsumableArray(args));
         };
+        !needWait && sync();
         return { define: define, bind: bind };
     }
 
     /** sender parts */
     function sender(data) {
-        sendHandler(data);
+        var force = data.command === SYNC_COMMAND;
+        if (!force && needWait) {
+            needWait.push(data);
+        } else {
+            sendHandler(data);
+        }
+    }
+    function initialize() {
+        if (needWait) {
+            var waiting = needWait;
+            needWait = null;
+            waiting.forEach(function (payload) {
+                sender(payload);
+            });
+        }
     }
 
     function send(command, data) {
@@ -188,22 +207,61 @@ function createMessager(sendHandler) {
             }
         }
     }
-    return { bind: bind, define: define, listener: listener };
+    var __sync = bind(SYNC_COMMAND);
+    function _sync() {
+        var defines = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+
+        defines.filter(function (d) {
+            return !(d in fn);
+        }).map(function (d) {
+            fn[d] = bind(d);
+        });
+        initialize();
+        return Object.keys(callbacks);
+    }
+    define(SYNC_COMMAND, _sync);
+
+    function sync() {
+        __sync(Object.keys(callbacks)).then(_sync);
+    }
+
+    return { bind: bind, define: define, listener: listener, ready: sync, fn: fn };
 }
 
+var postMessage = window.postMessage;
+
 var _createMessager = createMessager(function (data) {
-    return window.postMessage(JSON.stringify(data));
+    return postMessage(JSON.stringify(data));
 });
 var bind = _createMessager.bind;
 var define = _createMessager.define;
 var listener = _createMessager.listener;
+var ready = _createMessager.ready;
+var fn = _createMessager.fn;
+
+if (window['originalPostMessage']) {
+    ready();
+} else {
+    var descriptor = {
+        get: function get() {
+            return postMessage;
+        },
+        set: function set(value) {
+            postMessage = value;
+            if (window['originalPostMessage']) {
+                ready();
+            }
+        }
+    };
+    Object.defineProperty(window, 'postMessage', descriptor);
+}
 
 window.document.addEventListener('message', function (e) {
     return listener(JSON.parse(e.data));
 });
 
 var browser = {
-    bind: bind, define: define
+    bind: bind, define: define, fn: fn
 };
 
 return browser;

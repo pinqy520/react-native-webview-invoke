@@ -117,13 +117,17 @@ function getUID() {
 }
 
 var getTransactionKey = function getTransactionKey(data) {
-    return data.command + "(" + data.id + ")";
+    return data.command + '(' + data.id + ')';
 };
 
+var SYNC_COMMAND = 'RNWV:sync';
+
 function createMessager(sendHandler) {
+    var needWait = [];
 
     var transactions = {};
     var callbacks = {};
+    var fn = {};
 
     function bind(name) {
         return function () {
@@ -135,16 +139,31 @@ function createMessager(sendHandler) {
         };
     }
 
-    function define(name, fn) {
+    function define(name, func) {
         callbacks[name] = function (args) {
-            return fn.apply(undefined, toConsumableArray(args));
+            return func.apply(undefined, toConsumableArray(args));
         };
+        !needWait && sync();
         return { define: define, bind: bind };
     }
 
     /** sender parts */
     function sender(data) {
-        sendHandler(data);
+        var force = data.command === SYNC_COMMAND;
+        if (!force && needWait) {
+            needWait.push(data);
+        } else {
+            sendHandler(data);
+        }
+    }
+    function initialize() {
+        if (needWait) {
+            var waiting = needWait;
+            needWait = null;
+            waiting.forEach(function (payload) {
+                sender(payload);
+            });
+        }
     }
 
     function send(command, data) {
@@ -182,7 +201,25 @@ function createMessager(sendHandler) {
             }
         }
     }
-    return { bind: bind, define: define, listener: listener };
+    var __sync = bind(SYNC_COMMAND);
+    function _sync() {
+        var defines = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+
+        defines.filter(function (d) {
+            return !(d in fn);
+        }).map(function (d) {
+            fn[d] = bind(d);
+        });
+        initialize();
+        return Object.keys(callbacks);
+    }
+    define(SYNC_COMMAND, _sync);
+
+    function sync() {
+        __sync(Object.keys(callbacks)).then(_sync);
+    }
+
+    return { bind: bind, define: define, listener: listener, ready: sync, fn: fn };
 }
 
 var native = (function (getWebview) {
@@ -191,10 +228,11 @@ var native = (function (getWebview) {
     }),
         bind = _createMessager.bind,
         define = _createMessager.define,
-        handler = _createMessager.listener;
+        handler = _createMessager.listener,
+        fn = _createMessager.fn;
 
     return {
-        bind: bind, define: define,
+        bind: bind, define: define, fn: fn,
         listener: function listener(e) {
             return handler(JSON.parse(e.nativeEvent.data));
         }

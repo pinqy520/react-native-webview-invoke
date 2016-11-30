@@ -52,11 +52,9 @@
             }
             window.WebViewInvoke.define('get', nativeWannaGet)
             window.WebViewInvoke.define('set', nativeWannaSet)
-            setTimeout(function(){
-                webReady()
+            webReady().then(function() {
                 $status.innerText = '[Ready] Done!'
-            }, 2000)
-
+            })
             document.querySelector('.set').addEventListener('click', function(){
                 $status.innerText = '[Set To RN] Sending'
                 setToNative($input.value)

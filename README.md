@@ -129,7 +129,7 @@ await tellAYouArea('B', 'Mr.')
 // 'Hi, Mr.B'
 ```
 
-In addition, you can use them without definition too. (unrecomendation)
+In addition, you can use them without definition too.
 
 ``` javascript
 await invoke.fn.whatIsTheNameOfA()
@@ -172,6 +172,21 @@ Args:
 Return:
 
 [`(...args: any[]) => Promise<any>`] function
+
+
+### `invoke.fn`
+
+> All functions that defined at the other side
+
+用法
+
+``` javascript
+// A side
+invoke.define('test', test)
+
+// B side
+invoke.fn.test()
+```
 
 
 ### `invoke.listener`

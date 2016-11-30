@@ -29,23 +29,42 @@ type callbackStatic = (...data: any) => any
 
 const getTransactionKey = (data: PayloadStatic<any>) => `${data.command}(${data.id})`
 
+const SYNC_COMMAND = 'RNWV:sync'
+
 export function createMessager(sendHandler: (data: any) => void) {
+    let needWait: PayloadStatic<any>[] | null = []
 
     const transactions: { [key: string]: Deferred } = {}
     const callbacks: { [key: string]: callbackStatic } = {}
+    const fn: { [key: string]: any } = {}
 
-    function bind<TArgs, TReturn>(name: string) {
-        return (...args: any): Promise<TReturn> => send(name, args)
+    function bind(name: string) {
+        return (...args: any): Promise<any> => send(name, args)
     }
 
-    function define(name: string, fn: callbackStatic) {
-        callbacks[name] = (args: any) => fn(...args)
+    function define(name: string, func: callbackStatic) {
+        callbacks[name] = (args: any) => func(...args)
+        !needWait && sync()
         return { define, bind }
     }
 
     /** sender parts */
     function sender(data: PayloadStatic<any>) {
-        sendHandler(data)
+        const force = data.command === SYNC_COMMAND
+        if (!force && needWait) {
+            needWait.push(data)
+        } else {
+            sendHandler(data)
+        }
+    }
+    function initialize() {
+        if (needWait) {
+            const waiting = needWait
+            needWait = null
+            waiting.forEach(payload => {
+                sender(payload)
+            })
+        }
     }
 
     function send(command: string, data: any) {
@@ -81,5 +100,21 @@ export function createMessager(sendHandler: (data: any) => void) {
             }
         }
     }
-    return { bind, define, listener }
+    const __sync = bind(SYNC_COMMAND)
+    function _sync(defines: string[] = []) {
+        defines.filter(d => !(d in fn))
+            .map(d => {
+                fn[d] = bind(d)
+            })
+        initialize()
+        return Object.keys(callbacks)
+    }
+    define(SYNC_COMMAND, _sync)
+
+    function sync() {
+        __sync(Object.keys(callbacks)).then(_sync)
+    }
+
+
+    return { bind, define, listener, ready: sync, fn }
 }
