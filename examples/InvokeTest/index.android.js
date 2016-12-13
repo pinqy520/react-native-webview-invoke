@@ -9,24 +9,33 @@ import {
   AppRegistry,
   StyleSheet,
   Text,
-  View
+  View, WebView
 } from 'react-native';
 
+import createInvoke from 'react-native-webview-invoke/native'
+
 export default class InvokeTest extends Component {
+  webview: WebView
+  invoke = createInvoke(() => this.webview)
+  webInitialize = () => {
+    alert('[Ready] Done!')
+  }
+  webWannaGet = () => 'Hi, Web!'
+  webWannaSet = (data) => {
+    alert(`[Receive From Web] '${data}'`)
+  }
+  componentDidMount() {
+    this.invoke
+      .define('init', this.webInitialize)
+      .define('get', this.webWannaGet)
+      .define('set', this.webWannaSet)
+  }
   render() {
     return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit index.android.js
-        </Text>
-        <Text style={styles.instructions}>
-          Double tap R on your keyboard to reload,{'\n'}
-          Shake or press menu button for dev menu
-        </Text>
-      </View>
+      <WebView ref={w => this.webview = w}
+        source={require('./index.html')}
+        onMessage={this.invoke.listener}
+        />
     );
   }
 }
