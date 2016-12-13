@@ -46,7 +46,7 @@ $ cd react-native-webview-invoke/dev
 $ react-native run-ios
 ```
 
-Then open the iOS Xcode project under `dev/ios` folder, and run.
+Or open the iOS Xcode project under `dev/ios` folder, and run.
 
 ## Basic Usage
 
