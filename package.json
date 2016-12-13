@@ -29,7 +29,8 @@
   "files": [
     "native.js",
     "browser.js",
-    "factory.js"
+    "factory.js",
+    "src"
   ],
   "homepage": "https://github.com/pinqy520/react-native-webview-invoke#readme",
   "dependencies": {},
