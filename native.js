@@ -1,1 +1,3 @@
-export * from './src/native'
+export create from './src/native'
+
+export default create
