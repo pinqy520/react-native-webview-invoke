@@ -42,12 +42,8 @@ Requires：
 
 ```
 $ git clone git@github.com:pinqy520/react-native-webview-invoke.git
-$ cd react-native-webview-invoke
-$ npm install
-$ cd dev
-$ npm install
-$ cd ..
-$ npm run dev
+$ cd react-native-webview-invoke/dev
+$ react-native run-ios
 ```
 
 Then open the iOS Xcode project under `dev/ios` folder, and run.

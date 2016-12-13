@@ -1,5 +1,6 @@
 [ignore]
 <PROJECT_ROOT>/dev/
+<PROJECT_ROOT>/example/
 
 [include]
 
