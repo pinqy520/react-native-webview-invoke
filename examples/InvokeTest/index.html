@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>test</title>
+    <style>
+        .status {
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .input {
+            width: 100%;
+            box-sizing: border-box;
+            line-height: 25px;
+            margin: 5px 0;
+        }
+        
+        button {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Web Side:</h1>
+    <p class="status">[Loading] Waiting for bridge ready</p>
+    <input class="input" type="text" placeholder="Some..." />
+    <button class="set" label="Send To RN">Send To RN</button>
+    <button class="get" label="Get From RN">Get From RN</button>
+
+    <script src="https://cdn.bootcss.com/es6-promise/4.0.5/es6-promise.auto.min.js"></script>
+    <script src="https://tb1.bdstatic.com/tb/libs/rnwi-browser.js"></script>
+    <!-- DEV
+    <script src="http://localhost:8080/browser.js"></script>
+    -->
+    <script>
+        (function () {
+            var $input = document.querySelector('.input')
+            var $status = document.querySelector('.status')
+            
+            var getFromNative = window.WebViewInvoke.bind('get')
+            var setToNative = window.WebViewInvoke.bind('set')
+            var webReady = window.WebViewInvoke.bind('init')
+            function nativeWannaGet() {
+                return $input.value
+            }
+            function nativeWannaSet(data) {
+                $status.innerText = '[Receive From RN] "' + data + '"'
+            }
+            window.WebViewInvoke.define('get', nativeWannaGet)
+            window.WebViewInvoke.define('set', nativeWannaSet)
+            webReady().then(function() {
+                $status.innerText = '[Ready] Done!'
+            })
+            document.querySelector('.set').addEventListener('click', function(){
+                $status.innerText = '[Set To RN] Sending'
+                setToNative($input.value)
+                    .then(function () {
+                        $status.innerText = '[Set To RN] Success'
+                    })
+            })
+            document.querySelector('.get').addEventListener('click', function(){
+                getFromNative()
+                    .then(function (data) {
+                        $status.innerText = '[Get From RN] "' + data + '"'
+                    })
+            })
+        })()
+    </script>
+</body>
+
+</html>

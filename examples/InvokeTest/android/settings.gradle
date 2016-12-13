@@ -1,0 +1,3 @@
+rootProject.name = 'InvokeTest'
+
+include ':app'
