@@ -7,7 +7,9 @@
     "build:native": "rollup --config rollup.config.native.js",
     "build:browser": "rollup --config rollup.config.browser.js",
     "build": "npm run build:native && npm run build:browser",
-    "static": "http-server dist"
+    "static": "http-server dist",
+    "start:react-native": "(cd dev && npm start)",
+    "dev": "concurrently \"npm run static\" \"npm run start:react-native\""
   },
   "repository": {
     "type": "git",
@@ -39,6 +41,7 @@
     "babel-plugin-transform-flow-strip-types": "latest",
     "babel-preset-latest": "latest",
     "babelrc-rollup": "latest",
+    "concurrently": "^3.1.0",
     "http-server": "^0.9.0",
     "rollup": "latest",
     "rollup-plugin-babel": "latest",
