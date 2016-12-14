@@ -224,10 +224,10 @@ function createMessager(sendHandler) {
     return { bind: bind, define: define, listener: listener, ready: sync, fn: fn };
 }
 
-var postMessage = window.postMessage;
+var originalPostMessage = window['originalPostMessage'];
 
 var _createMessager = createMessager(function (data) {
-    return postMessage(JSON.stringify(data));
+    return window.postMessage(JSON.stringify(data));
 });
 var bind = _createMessager.bind;
 var define = _createMessager.define;
@@ -235,21 +235,21 @@ var listener = _createMessager.listener;
 var ready = _createMessager.ready;
 var fn = _createMessager.fn;
 
-if (window['originalPostMessage']) {
+if (originalPostMessage) {
     ready();
 } else {
     var descriptor = {
         get: function get() {
-            return postMessage;
+            return originalPostMessage;
         },
         set: function set(value) {
-            postMessage = value;
-            if (window['originalPostMessage']) {
-                ready();
+            originalPostMessage = value;
+            if (originalPostMessage) {
+                setTimeout(ready, 50);
             }
         }
     };
-    Object.defineProperty(window, 'postMessage', descriptor);
+    Object.defineProperty(window, 'originalPostMessage', descriptor);
 }
 
 window.document.addEventListener('message', function (e) {

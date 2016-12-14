@@ -2,27 +2,27 @@
 
 import { createMessager } from './messager/index'
 
-let postMessage = window.postMessage
+let originalPostMessage = window['originalPostMessage']
 
 const { bind, define, listener, ready, fn } = createMessager(
-    (data: any) => postMessage(JSON.stringify(data))
+    (data: any) => window.postMessage(JSON.stringify(data))
 )
 
-if (window['originalPostMessage']) {
+if (originalPostMessage) {
     ready()
 } else {
     const descriptor: any = {
         get: function () {
-            return postMessage
+            return originalPostMessage
         },
         set: function (value) {
-            postMessage = value
-            if (window['originalPostMessage']) {
-                ready()
+            originalPostMessage = value
+            if (originalPostMessage) {
+                setTimeout(ready, 50)
             }
         }
     }
-    Object.defineProperty(window, 'postMessage', descriptor)
+    Object.defineProperty(window, 'originalPostMessage', descriptor)
 }
 
 window.document.addEventListener('message', e => listener(JSON.parse(e.data)))
