@@ -12,7 +12,7 @@ class Deferred {
     }
 }
 
-interface PayloadStatic<T> {
+interface IPayload<T> {
     id: number,
     command: string,
     data: T,
@@ -25,31 +25,31 @@ function getUID() {
     return count++
 }
 
-type callbackStatic = (...data: any) => any
+type TCallback = (...data: any) => any
 
-const getTransactionKey = (data: PayloadStatic<any>) => `${data.command}(${data.id})`
+const getTransactionKey = (data: IPayload<any>) => `${data.command}(${data.id})`
 
 const SYNC_COMMAND = 'RNWV:sync'
 
 export function createMessager(sendHandler: (data: any) => void) {
-    let needWait: PayloadStatic<any>[] | null = []
+    let needWait: IPayload<any>[] | null = []
 
     const transactions: { [key: string]: Deferred } = {}
-    const callbacks: { [key: string]: callbackStatic } = {}
+    const callbacks: { [key: string]: TCallback } = {}
     const fn: { [key: string]: any } = {}
 
     function bind(name: string) {
         return (...args: any): Promise<any> => send(name, args)
     }
 
-    function define(name: string, func: callbackStatic) {
+    function define(name: string, func: TCallback) {
         callbacks[name] = (args: any) => func(...args)
         !needWait && sync()
         return { define, bind }
     }
 
     /** sender parts */
-    function sender(data: PayloadStatic<any>) {
+    function sender(data: IPayload<any>) {
         const force = data.command === SYNC_COMMAND
         if (!force && needWait) {
             needWait.push(data)
@@ -68,7 +68,7 @@ export function createMessager(sendHandler: (data: any) => void) {
     }
 
     function send(command: string, data: any) {
-        const payload: PayloadStatic<any> = {
+        const payload: IPayload<any> = {
             command, data, id: getUID(), reply: false
         }
         const defer = new Deferred()
@@ -77,13 +77,13 @@ export function createMessager(sendHandler: (data: any) => void) {
         return defer.promise
     }
 
-    function reply(data: PayloadStatic<any>, result: any) {
+    function reply(data: IPayload<any>, result: any) {
         data.reply = true
         data.data = result
         sender(data)
     }
     /** listener parts */
-    function listener(data: PayloadStatic<any>) {
+    function listener(data: IPayload<any>) {
         if (data.reply) {
             const key = getTransactionKey(data)
             transactions[key] && transactions[key].resolve(data.data)
@@ -100,6 +100,9 @@ export function createMessager(sendHandler: (data: any) => void) {
             }
         }
     }
+
+
+
     const __sync = bind(SYNC_COMMAND)
     function _sync(defines: string[] = []) {
         defines.filter(d => !(d in fn))
