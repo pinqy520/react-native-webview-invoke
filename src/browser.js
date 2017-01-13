@@ -4,7 +4,7 @@ import { createMessager } from './messager/index'
 
 let originalPostMessage = window['originalPostMessage']
 
-const { bind, define, listener, ready, fn } = createMessager(
+const { bind, define, listener, ready, fn, addEventListener, removeEventListener } = createMessager(
     (data: any) => window.postMessage(JSON.stringify(data))
 )
 
@@ -28,5 +28,5 @@ if (originalPostMessage) {
 window.document.addEventListener('message', e => listener(JSON.parse(e.data)))
 
 export default {
-    bind, define, fn
+    bind, define, fn, addEventListener, removeEventListener
 }

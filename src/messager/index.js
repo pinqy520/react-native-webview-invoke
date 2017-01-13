@@ -1,5 +1,7 @@
 // @flow
 
+import { createEventBus } from './event-bus'
+
 class Deferred {
     promise: Promise<any>
     resolve: (data: any) => void
@@ -33,10 +35,10 @@ const SYNC_COMMAND = 'RNWV:sync'
 
 export function createMessager(sendHandler: (data: any) => void) {
     let needWait: IPayload<any>[] | null = []
-
+    const eventBus = createEventBus()
     const transactions: { [key: string]: Deferred } = {}
-    const callbacks: { [key: string]: TCallback } = {}
-    const fn: { [key: string]: any } = {}
+    const callbacks: { [key: string]: TCallback } = {} // 
+    const fn: { [key: string]: any } = {} // all other side functions
 
     function bind(name: string) {
         return (...args: any): Promise<any> => send(name, args)
@@ -50,12 +52,13 @@ export function createMessager(sendHandler: (data: any) => void) {
 
     /** sender parts */
     function sender(data: IPayload<any>) {
-        const force = data.command === SYNC_COMMAND
+        const force = data.command === SYNC_COMMAND // force send the message when the message is the sync message
         if (!force && needWait) {
             needWait.push(data)
         } else {
             sendHandler(data)
         }
+        eventBus.emitEvent('send', data)
     }
     function initialize() {
         if (needWait) {
@@ -82,6 +85,7 @@ export function createMessager(sendHandler: (data: any) => void) {
         data.data = result
         sender(data)
     }
+
     /** listener parts */
     function listener(data: IPayload<any>) {
         if (data.reply) {
@@ -99,6 +103,7 @@ export function createMessager(sendHandler: (data: any) => void) {
                 reply(data, null)
             }
         }
+        eventBus.emitEvent('receive', data)
     }
 
 
@@ -119,5 +124,5 @@ export function createMessager(sendHandler: (data: any) => void) {
     }
 
 
-    return { bind, define, listener, ready: sync, fn }
+    return { bind, define, listener, ready: sync, fn, addEventListener: eventBus.addEventListener, removeEventListener: eventBus.removeEventListener }
 }

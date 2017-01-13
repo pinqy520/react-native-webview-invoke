@@ -1,5 +1,42 @@
 'use strict';
 
+function createEventBus() {
+    var listeners = {
+        send: [],
+        receive: []
+    };
+
+    function addEventListener(name, cb) {
+        if (name in listeners) {
+            var fns = listeners[name];
+            if (fns.indexOf(cb) < 0) {
+                fns.push(cb);
+            }
+        }
+    }
+
+    function removeEventListener(name, cb) {
+        if (name in listeners) {
+            var fns = listeners[name];
+            var idx = fns.indexOf(cb);
+            if (idx >= 0) {
+                fns.splice(idx, 1);
+            }
+        }
+    }
+
+    function emitEvent(name, event) {
+        if (name in listeners) {
+            listeners[name].forEach(function (fn) {
+                return fn(event);
+            });
+        }
+    }
+    return { addEventListener: addEventListener, removeEventListener: removeEventListener, emitEvent: emitEvent };
+}
+
+// export const GlobalEventBus = createEventBus()
+
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -14,30 +51,6 @@ var classCallCheck = function (instance, Constructor) {
 
 
 
-var get$1 = function get$1(object, property, receiver) {
-  if (object === null) object = Function.prototype;
-  var desc = Object.getOwnPropertyDescriptor(object, property);
-
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
-
-    if (parent === null) {
-      return undefined;
-    } else {
-      return get$1(parent, property, receiver);
-    }
-  } else if ("value" in desc) {
-    return desc.value;
-  } else {
-    var getter = desc.get;
-
-    if (getter === undefined) {
-      return undefined;
-    }
-
-    return getter.call(receiver);
-  }
-};
 
 
 
@@ -55,27 +68,8 @@ var get$1 = function get$1(object, property, receiver) {
 
 
 
-var set$1 = function set$1(object, property, value, receiver) {
-  var desc = Object.getOwnPropertyDescriptor(object, property);
 
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
 
-    if (parent !== null) {
-      set$1(parent, property, value, receiver);
-    }
-  } else if ("value" in desc && desc.writable) {
-    desc.value = value;
-  } else {
-    var setter = desc.set;
-
-    if (setter !== undefined) {
-      setter.call(receiver, value);
-    }
-  }
-
-  return value;
-};
 
 
 
@@ -126,10 +120,10 @@ var SYNC_COMMAND = 'RNWV:sync';
 
 function createMessager(sendHandler) {
     var needWait = [];
-
+    var eventBus = createEventBus();
     var transactions = {};
-    var callbacks = {};
-    var fn = {};
+    var callbacks = {}; // 
+    var fn = {}; // all other side functions
 
     function bind(name) {
         return function () {
@@ -151,12 +145,13 @@ function createMessager(sendHandler) {
 
     /** sender parts */
     function sender(data) {
-        var force = data.command === SYNC_COMMAND;
+        var force = data.command === SYNC_COMMAND; // force send the message when the message is the sync message
         if (!force && needWait) {
             needWait.push(data);
         } else {
             sendHandler(data);
         }
+        eventBus.emitEvent('send', data);
     }
     function initialize() {
         if (needWait) {
@@ -183,6 +178,7 @@ function createMessager(sendHandler) {
         data.data = result;
         sender(data);
     }
+
     /** listener parts */
     function listener(data) {
         if (data.reply) {
@@ -202,7 +198,9 @@ function createMessager(sendHandler) {
                 reply(data, null);
             }
         }
+        eventBus.emitEvent('receive', data);
     }
+
     var __sync = bind(SYNC_COMMAND);
     function _sync() {
         var defines = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
@@ -221,7 +219,7 @@ function createMessager(sendHandler) {
         __sync(Object.keys(callbacks)).then(_sync);
     }
 
-    return { bind: bind, define: define, listener: listener, ready: sync, fn: fn };
+    return { bind: bind, define: define, listener: listener, ready: sync, fn: fn, addEventListener: eventBus.addEventListener, removeEventListener: eventBus.removeEventListener };
 }
 
 var originalPostMessage = window['originalPostMessage'];
@@ -234,6 +232,8 @@ var define = _createMessager.define;
 var listener = _createMessager.listener;
 var ready = _createMessager.ready;
 var fn = _createMessager.fn;
+var addEventListener = _createMessager.addEventListener;
+var removeEventListener = _createMessager.removeEventListener;
 
 if (originalPostMessage) {
     ready();
@@ -257,7 +257,7 @@ window.document.addEventListener('message', function (e) {
 });
 
 var browser = {
-    bind: bind, define: define, fn: fn
+    bind: bind, define: define, fn: fn, addEventListener: addEventListener, removeEventListener: removeEventListener
 };
 
 module.exports = browser;
