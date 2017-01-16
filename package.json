@@ -32,6 +32,9 @@
     "native.js",
     "browser.js",
     "factory.js",
+    "native.d.ts",
+    "browser.d.ts",
+    "factory.d.ts",
     "src"
   ],
   "homepage": "https://github.com/pinqy520/react-native-webview-invoke#readme",
