@@ -35,15 +35,16 @@
     <button class="get" label="Get From RN">Get From RN</button>
 
     <script src="https://cdn.bootcss.com/es6-promise/4.0.5/es6-promise.auto.min.js"></script>
+    <!-- TEST
     <script src="https://tb1.bdstatic.com/tb/libs/rnwi-browser.js"></script>
-    <!-- DEV
-    <script src="http://localhost:8080/browser.js"></script>
     -->
+    <script src="http://localhost:8080/browser.js"></script>
+
     <script>
         (function () {
             var $input = document.querySelector('.input')
             var $status = document.querySelector('.status')
-            
+
             var getFromNative = window.WebViewInvoke.bind('get')
             var setToNative = window.WebViewInvoke.bind('set')
             var webReady = window.WebViewInvoke.bind('init')
@@ -55,21 +56,27 @@
             }
             window.WebViewInvoke.define('get', nativeWannaGet)
             window.WebViewInvoke.define('set', nativeWannaSet)
-            webReady().then(function() {
+            webReady().then(function () {
                 $status.innerText = '[Ready] Done!'
             })
-            document.querySelector('.set').addEventListener('click', function(){
+            document.querySelector('.set').addEventListener('click', function () {
                 $status.innerText = '[Set To RN] Sending'
                 setToNative($input.value)
                     .then(function () {
                         $status.innerText = '[Set To RN] Success'
                     })
             })
-            document.querySelector('.get').addEventListener('click', function(){
+            document.querySelector('.get').addEventListener('click', function () {
                 getFromNative()
                     .then(function (data) {
                         $status.innerText = '[Get From RN] "' + data + '"'
                     })
+            })
+            window.WebViewInvoke.addEventListener('send', function (params) {
+                console.log('send', params, window.WebViewInvoke.isConnect())
+            })
+            window.WebViewInvoke.addEventListener('receive', function (params) {
+                console.log('receive', params, window.WebViewInvoke.isConnect())
             })
         })()
     </script>

@@ -40,6 +40,8 @@ export function createMessager(sendHandler: (data: any) => void) {
     const callbacks: { [key: string]: TCallback } = {} // 
     const fn: { [key: string]: any } = {} // all other side functions
 
+    function isConnect() { return !needWait }
+
     function bind(name: string) {
         return (...args: any): Promise<any> => send(name, args)
     }
@@ -124,5 +126,5 @@ export function createMessager(sendHandler: (data: any) => void) {
     }
 
 
-    return { bind, define, listener, ready: sync, fn, addEventListener: eventBus.addEventListener, removeEventListener: eventBus.removeEventListener }
+    return { bind, define, listener, ready: sync, fn, addEventListener: eventBus.addEventListener, removeEventListener: eventBus.removeEventListener, isConnect }
 }

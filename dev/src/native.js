@@ -123,6 +123,10 @@ function createMessager(sendHandler) {
     var callbacks = {}; // 
     var fn = {}; // all other side functions
 
+    function isConnect() {
+        return !needWait;
+    }
+
     function bind(name) {
         return function () {
             for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
@@ -217,7 +221,7 @@ function createMessager(sendHandler) {
         __sync(Object.keys(callbacks)).then(_sync);
     }
 
-    return { bind: bind, define: define, listener: listener, ready: sync, fn: fn, addEventListener: eventBus.addEventListener, removeEventListener: eventBus.removeEventListener };
+    return { bind: bind, define: define, listener: listener, ready: sync, fn: fn, addEventListener: eventBus.addEventListener, removeEventListener: eventBus.removeEventListener, isConnect: isConnect };
 }
 
 var native = (function (getWebview) {
@@ -229,14 +233,15 @@ var native = (function (getWebview) {
         handler = _createMessager.listener,
         fn = _createMessager.fn,
         addEventListener = _createMessager.addEventListener,
-        removeEventListener = _createMessager.removeEventListener;
+        removeEventListener = _createMessager.removeEventListener,
+        isConnect = _createMessager.isConnect;
 
     return {
         bind: bind, define: define, fn: fn,
         listener: function listener(e) {
             return handler(JSON.parse(e.nativeEvent.data));
         },
-        addEventListener: addEventListener, removeEventListener: removeEventListener
+        addEventListener: addEventListener, removeEventListener: removeEventListener, isConnect: isConnect
     };
 });
 

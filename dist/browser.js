@@ -129,6 +129,10 @@ function createMessager(sendHandler) {
     var callbacks = {}; // 
     var fn = {}; // all other side functions
 
+    function isConnect() {
+        return !needWait;
+    }
+
     function bind(name) {
         return function () {
             for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
@@ -223,7 +227,7 @@ function createMessager(sendHandler) {
         __sync(Object.keys(callbacks)).then(_sync);
     }
 
-    return { bind: bind, define: define, listener: listener, ready: sync, fn: fn, addEventListener: eventBus.addEventListener, removeEventListener: eventBus.removeEventListener };
+    return { bind: bind, define: define, listener: listener, ready: sync, fn: fn, addEventListener: eventBus.addEventListener, removeEventListener: eventBus.removeEventListener, isConnect: isConnect };
 }
 
 var originalPostMessage = window['originalPostMessage'];
@@ -238,6 +242,7 @@ var ready = _createMessager.ready;
 var fn = _createMessager.fn;
 var addEventListener = _createMessager.addEventListener;
 var removeEventListener = _createMessager.removeEventListener;
+var isConnect = _createMessager.isConnect;
 
 if (originalPostMessage) {
     ready();
@@ -261,7 +266,7 @@ window.document.addEventListener('message', function (e) {
 });
 
 var browser = {
-    bind: bind, define: define, fn: fn, addEventListener: addEventListener, removeEventListener: removeEventListener
+    bind: bind, define: define, fn: fn, addEventListener: addEventListener, removeEventListener: removeEventListener, isConnect: isConnect
 };
 
 return browser;
