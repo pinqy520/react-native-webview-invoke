@@ -7,13 +7,13 @@ export interface IPayload<T> {
 
 
 export interface IMessager {
-    bind<P, T>(name: string): (...args: P) => Promise<T>
+    bind<T>(name: string): (...args: any[]) => Promise<T>
     define(name: string, callback: Function): void
     listener(data: any): any
     ready(): void
     fn: any
-    addEventListener(name: string, callback: (params: IPayload<any>) => void)
-    removeEventListener(name: string, callback: (params: IPayload<any>) => void)
+    addEventListener(name: string, callback: (params: IPayload<any>) => void): void
+    removeEventListener(name: string, callback: (params: IPayload<any>) => void): void
     isConnect(): boolean
 }
 
