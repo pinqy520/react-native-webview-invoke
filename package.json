@@ -1,6 +1,6 @@
 {
   "name": "react-native-webview-invoke",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Invoke functions between React Native and WebView directly",
   "main": "index.js",
   "scripts": {
