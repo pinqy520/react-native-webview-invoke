@@ -1,1 +1,1 @@
-module.exports = require('./dist/factory.common.js')
+module.exports.default = require('./dist/factory.common.js').createMessager
