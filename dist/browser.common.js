@@ -226,10 +226,10 @@ function createMessager(sendHandler) {
     return { bind: bind, define: define, listener: listener, ready: sync, fn: fn, addEventListener: eventBus.addEventListener, removeEventListener: eventBus.removeEventListener, isConnect: isConnect };
 }
 
-var originalPostMessage = window['originalPostMessage'];
+var isBrowser = typeof window !== 'undefined';
 
 var _createMessager = createMessager(function (data) {
-    return window.postMessage(JSON.stringify(data));
+    isBrowser && window.postMessage(JSON.stringify(data));
 });
 var bind = _createMessager.bind;
 var define = _createMessager.define;
@@ -240,26 +240,33 @@ var addEventListener = _createMessager.addEventListener;
 var removeEventListener = _createMessager.removeEventListener;
 var isConnect = _createMessager.isConnect;
 
-if (originalPostMessage) {
-    ready();
-} else {
-    var descriptor = {
-        get: function get() {
-            return originalPostMessage;
-        },
-        set: function set(value) {
-            originalPostMessage = value;
-            if (originalPostMessage) {
-                setTimeout(ready, 50);
-            }
-        }
-    };
-    Object.defineProperty(window, 'originalPostMessage', descriptor);
-}
+if (isBrowser) {
+    (function () {
 
-window.document.addEventListener('message', function (e) {
-    return listener(JSON.parse(e.data));
-});
+        var originalPostMessage = window['originalPostMessage'];
+
+        if (originalPostMessage) {
+            ready();
+        } else {
+            var descriptor = {
+                get: function get() {
+                    return originalPostMessage;
+                },
+                set: function set(value) {
+                    originalPostMessage = value;
+                    if (originalPostMessage) {
+                        setTimeout(ready, 50);
+                    }
+                }
+            };
+            Object.defineProperty(window, 'originalPostMessage', descriptor);
+        }
+
+        window.document.addEventListener('message', function (e) {
+            return listener(JSON.parse(e.data));
+        });
+    })();
+}
 
 var browser = {
     bind: bind, define: define, fn: fn, addEventListener: addEventListener, removeEventListener: removeEventListener, isConnect: isConnect
