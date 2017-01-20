@@ -6,7 +6,8 @@
   "scripts": {
     "build:native": "rollup --config rollup.config.native.js",
     "build:browser": "rollup --config rollup.config.browser.js",
-    "build": "npm run build:native && npm run build:browser",
+    "build:factory": "rollup --config rollup.config.factory.js",
+    "build": "npm run build:native && npm run build:browser && npm run build:factory",
     "static": "http-server dist",
     "start:react-native": "(cd dev && npm start)",
     "dev": "concurrently \"npm run static\" \"npm run start:react-native\""

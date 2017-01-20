@@ -1,3 +1,1 @@
-import { createMessager } from './src/messager'
-
-export default createMessager
+module.exports = require('./dist/factory.common.js')

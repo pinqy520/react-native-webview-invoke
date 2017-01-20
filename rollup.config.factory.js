@@ -5,19 +5,19 @@ let pkg = require('./package.json');
 let external = Object.keys(pkg.dependencies);
 
 export default {
-    entry: 'src/browser.js',
+    entry: 'src/messager/index.js',
     plugins: [
         babel(babelrc()),
     ],
     external: external,
     targets: [
         {
-            dest: 'dist/browser.umd.js',
+            dest: 'dist/factory.umd.js',
             format: 'umd',
-            moduleName: 'WebViewInvoke'
+            moduleName: 'WebViewCreateInvoke'
         },
         {
-            dest: 'dist/browser.common.js',
+            dest: 'dist/factory.common.js',
             format: 'cjs',
         }
     ]
