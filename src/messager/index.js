@@ -69,6 +69,7 @@ export function createMessager(sendHandler: (data: any) => void) {
             waiting.forEach(payload => {
                 sender(payload)
             })
+            eventBus.emitEvent('ready')
         }
     }
 

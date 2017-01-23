@@ -2,9 +2,10 @@
 
 
 export function createEventBus() {
-    const listeners: {[key: string]: Function[]} = {
+    const listeners: { [key: string]: Function[] } = {
         send: [],
-        receive: []
+        receive: [],
+        ready: []
     }
 
     function addEventListener<T>(name: string, cb: (event: T) => any) {

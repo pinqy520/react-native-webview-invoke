@@ -1,7 +1,8 @@
 function createEventBus() {
     var listeners = {
         send: [],
-        receive: []
+        receive: [],
+        ready: []
     };
 
     function addEventListener(name, cb) {
@@ -162,6 +163,7 @@ function createMessager(sendHandler) {
             waiting.forEach(function (payload) {
                 sender(payload);
             });
+            eventBus.emitEvent('ready');
         }
     }
 
