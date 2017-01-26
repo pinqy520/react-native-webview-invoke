@@ -1,1 +1,1 @@
-module.exports = require('./dist/browser.common.js')
+module.exports.default = require('./dist/browser.common.js')
