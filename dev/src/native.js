@@ -241,7 +241,12 @@ var native = (function (getWebview) {
     return {
         bind: bind, define: define, fn: fn,
         listener: function listener(e) {
-            return handler(JSON.parse(e.nativeEvent.data));
+            var data = void 0;
+            try {
+                // FIX: webpack hotloader will triger this
+                data = JSON.parse(e.nativeEvent.data);
+            } catch (e) {}
+            data && handler(data);
         },
         addEventListener: addEventListener, removeEventListener: removeEventListener, isConnect: isConnect
     };
