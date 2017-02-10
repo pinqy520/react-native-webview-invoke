@@ -6,6 +6,8 @@
 
 > Invoke functions between React Native and WebView directly
 
+[`react-native-webview-bridge` Support](https://github.com/pinqy520/react-native-webviewbridge-invoke)
+
 Just like: 
 
 ``` javascript
@@ -212,3 +214,4 @@ Usage:
 
 
 
+ 
