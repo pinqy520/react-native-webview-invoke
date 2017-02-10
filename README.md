@@ -42,11 +42,11 @@ Requires：
 
 ```
 $ git clone git@github.com:pinqy520/react-native-webview-invoke.git
-$ cd react-native-webview-invoke/dev
+$ cd react-native-webview-invoke/examples/InvokeTest
 $ react-native run-ios
 ```
 
-Or open the iOS Xcode project under `dev/ios` folder, and run.
+Or open the iOS Xcode project under `examples/InvokeTest/ios` folder, and run.
 
 ## Basic Usage
 
@@ -89,7 +89,7 @@ import invoke from 'react-native-webview-invoke/browser'
 Or use `<script>` in `.html`
 
 ``` html
-<script src="./node_modules/react-native-webview-invoke/browser.js"></script>
+<script src="./node_modules/react-native-webview-invoke/dist/browser.umd.js"></script>
 <script>
 var invoke = window.WebViewInvoke
 </script>
