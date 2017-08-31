@@ -42,14 +42,16 @@
   "homepage": "https://github.com/pinqy520/react-native-webview-invoke#readme",
   "dependencies": {},
   "devDependencies": {
-    "babel-plugin-external-helpers": "latest",
-    "babel-plugin-transform-flow-strip-types": "latest",
-    "babel-preset-latest": "latest",
-    "babelrc-rollup": "latest",
-    "concurrently": "^3.1.0",
-    "http-server": "^0.9.0",
-    "rollup": "latest",
-    "rollup-plugin-babel": "latest",
-    "rollup-watch": "latest"
+    "babel-core": "^6.26.0",
+    "babel-plugin-external-helpers": "6.22.0",
+    "babel-plugin-transform-flow-strip-types": "6.22.0",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-latest": "6.24.1",
+    "babelrc-rollup": "3.0.0",
+    "concurrently": "^3.5.0",
+    "http-server": "^0.10.0",
+    "rollup": "0.49.2",
+    "rollup-plugin-babel": "3.0.2",
+    "rollup-watch": "4.3.1"
   }
 }
