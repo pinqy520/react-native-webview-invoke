@@ -98,7 +98,7 @@ export function createMessager(sendHandler: (data: any) => void) {
             if (callbacks[data.command]) {
                 const result = callbacks[data.command](data.data)
                 if (result && result.then) {
-                    result.then(d => reply(data, d))
+                    result.then(d => reply(data, d)).catch(e => reply(data, e))
                 } else {
                     reply(data, result)
                 }
