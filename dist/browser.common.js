@@ -196,6 +196,8 @@ function createMessager(sendHandler) {
                 if (result && result.then) {
                     result.then(function (d) {
                         return reply(data, d);
+                    }).catch(function (e) {
+                        return reply(data, e);
                     });
                 } else {
                     reply(data, result);
