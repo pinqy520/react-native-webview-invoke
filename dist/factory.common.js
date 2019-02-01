@@ -46,48 +46,6 @@ var classCallCheck = function (instance, Constructor) {
   }
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 var toConsumableArray = function (arr) {
   if (Array.isArray(arr)) {
     for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
@@ -120,6 +78,8 @@ var getTransactionKey = function getTransactionKey(data) {
 };
 
 var SYNC_COMMAND = 'RNWV:sync';
+var SUCCESS = 'success';
+var FAIL = 'fail';
 
 function createMessager(sendHandler) {
     var needWait = [];
@@ -181,9 +141,10 @@ function createMessager(sendHandler) {
         return defer.promise;
     }
 
-    function reply(data, result) {
+    function reply(data, result, status) {
         data.reply = true;
         data.data = result;
+        data.status = status;
         sender(data);
     }
 
@@ -191,21 +152,21 @@ function createMessager(sendHandler) {
     function listener(data) {
         if (data.reply) {
             var _key2 = getTransactionKey(data);
-            transactions[_key2] && transactions[_key2].resolve(data.data);
+            transactions[_key2] && (data.status === SUCCESS ? transactions[_key2].resolve(data.data) : transactions[_key2].reject(data.data));
         } else {
             if (callbacks[data.command]) {
                 var result = callbacks[data.command](data.data);
                 if (result && result.then) {
                     result.then(function (d) {
-                        return reply(data, d);
+                        return reply(data, d, SUCCESS);
                     }).catch(function (e) {
-                        return reply(data, e);
+                        return reply(data, e, FAIL);
                     });
                 } else {
-                    reply(data, result);
+                    reply(data, result, SUCCESS);
                 }
             } else {
-                reply(data, null);
+                reply(data, null, FAIL);
             }
         }
         eventBus.emitEvent('receive', data);
