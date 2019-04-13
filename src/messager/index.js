@@ -32,6 +32,8 @@ type TCallback = (...data: any) => any
 const getTransactionKey = (data: IPayload<any>) => `${data.command}(${data.id})`
 
 const SYNC_COMMAND = 'RNWV:sync'
+const SUCCESS = 'success';
+const FAIL = 'fail';
 
 export function createMessager(sendHandler: (data: any) => void) {
     let needWait: IPayload<any>[] | null = []
@@ -83,9 +85,10 @@ export function createMessager(sendHandler: (data: any) => void) {
         return defer.promise
     }
 
-    function reply(data: IPayload<any>, result: any) {
+    function reply(data: IPayload<any>, result: any, status: string) {
         data.reply = true
         data.data = result
+        data.status = status
         sender(data)
     }
 
@@ -93,17 +96,17 @@ export function createMessager(sendHandler: (data: any) => void) {
     function listener(data: IPayload<any>) {
         if (data.reply) {
             const key = getTransactionKey(data)
-            transactions[key] && transactions[key].resolve(data.data)
+            transactions[key] && (data.status === SUCCESS ? transactions[key].resolve(data.data) : transactions[key].reject(data.data))
         } else {
             if (callbacks[data.command]) {
                 const result = callbacks[data.command](data.data)
                 if (result && result.then) {
-                    result.then(d => reply(data, d))
+                    result.then(d => reply(data, d, SUCCESS)).catch(e => reply(data, e, FAIL))
                 } else {
-                    reply(data, result)
+                    reply(data, result, SUCCESS)
                 }
             } else {
-                reply(data, null)
+                reply(data, null, FAIL)
             }
         }
         eventBus.emitEvent('receive', data)
