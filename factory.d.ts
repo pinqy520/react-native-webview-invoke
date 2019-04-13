@@ -2,7 +2,8 @@ export interface IPayload<T> {
     id: number,
     command: string,
     data: T,
-    reply: boolean
+    reply: boolean,
+    status: 'success' | 'fail'
 }
 
 
