@@ -40,17 +40,7 @@ Requires：
 
 - React Native >= 0.37
 
-Note: add 'useWebKit' property for rn > 0.59
-
-## Run Demo
-
-```
-$ git clone git@github.com:pinqy520/react-native-webview-invoke.git
-$ cd react-native-webview-invoke/examples/InvokeTest
-$ react-native run-ios
-```
-
-Or open the iOS Xcode project under `examples/InvokeTest/ios` folder, and run.
+> Note: add 'useWebKit' property for rn > 0.59
 
 ## Basic Usage
 
@@ -71,6 +61,7 @@ class SomePage extends React.Component {
     webview: WebView
     invoke = createInvoke(() => this.webview)
     render() {
+        // Note: add 'useWebKit' property for rn > 0.59
         return <Webview useWebKit
             ref={webview => this.webview = webview}
             onMessage={this.invoke.listener}
