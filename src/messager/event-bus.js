@@ -1,14 +1,11 @@
-// @flow
-
-
 export function createEventBus() {
-    const listeners: { [key: string]: Function[] } = {
+    const listeners = {
         send: [],
         receive: [],
         ready: []
     }
 
-    function addEventListener<T>(name: string, cb: (event: T) => any) {
+    function addEventListener(name, cb) {
         if (name in listeners) {
             const fns = listeners[name]
             if (fns.indexOf(cb) < 0) {
@@ -17,7 +14,7 @@ export function createEventBus() {
         }
     }
 
-    function removeEventListener(name: string, cb: any) {
+    function removeEventListener(name, cb) {
         if (name in listeners) {
             const fns = listeners[name]
             const idx = fns.indexOf(cb)
@@ -27,12 +24,10 @@ export function createEventBus() {
         }
     }
 
-    function emitEvent<T>(name: string, event: T) {
+    function emitEvent(name, event) {
         if (name in listeners) {
             listeners[name].forEach(fn => fn(event))
         }
     }
     return { addEventListener, removeEventListener, emitEvent }
 }
-
-// export const GlobalEventBus = createEventBus()

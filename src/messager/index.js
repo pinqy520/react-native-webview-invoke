@@ -1,11 +1,6 @@
-// @flow
-
 import { createEventBus } from './event-bus'
 
 class Deferred {
-    promise: Promise<any>
-    resolve: (data: any) => void
-    reject: (reason: any) => void
     constructor() {
         this.promise = new Promise((resolve, reject) => {
             this.resolve = resolve
@@ -14,48 +9,39 @@ class Deferred {
     }
 }
 
-interface IPayload<T> {
-    id: number,
-    command: string,
-    data: T,
-    reply: boolean
-}
-
 let count = 0
 
 function getUID() {
     return count++
 }
 
-type TCallback = (...data: any) => any
-
-const getTransactionKey = (data: IPayload<any>) => `${data.command}(${data.id})`
+const getTransactionKey = data => `${data.command}(${data.id})`
 
 const SYNC_COMMAND = 'RNWV:sync'
 const SUCCESS = 'success';
 const FAIL = 'fail';
 
-export function createMessager(sendHandler: (data: any) => void) {
-    let needWait: IPayload<any>[] | null = []
+export function createMessager(sendHandler) {
+    let needWait = []
     const eventBus = createEventBus()
-    const transactions: { [key: string]: Deferred } = {}
-    const callbacks: { [key: string]: TCallback } = {} // 
-    const fn: { [key: string]: any } = {} // all other side functions
+    const transactions = {}
+    const callbacks = {} // 
+    const fn = {} // all other side functions
 
     function isConnect() { return !needWait }
 
-    function bind(name: string) {
-        return (...args: any): Promise<any> => send(name, args)
+    function bind(name) {
+        return (...args) => send(name, args)
     }
 
-    function define(name: string, func: TCallback) {
-        callbacks[name] = (args: any) => func(...args)
+    function define(name, func) {
+        callbacks[name] = (args) => func(...args)
         !needWait && sync()
         return { define, bind }
     }
 
     /** sender parts */
-    function sender(data: IPayload<any>) {
+    function sender(data) {
         const force = data.command === SYNC_COMMAND // force send the message when the message is the sync message
         if (!force && needWait) {
             needWait.push(data)
@@ -75,8 +61,8 @@ export function createMessager(sendHandler: (data: any) => void) {
         }
     }
 
-    function send(command: string, data: any) {
-        const payload: IPayload<any> = {
+    function send(command, data) {
+        const payload = {
             command, data, id: getUID(), reply: false
         }
         const defer = new Deferred()
@@ -85,7 +71,7 @@ export function createMessager(sendHandler: (data: any) => void) {
         return defer.promise
     }
 
-    function reply(data: IPayload<any>, result: any, status: string) {
+    function reply(data, result, status) {
         data.reply = true
         data.data = result
         data.status = status
@@ -93,7 +79,7 @@ export function createMessager(sendHandler: (data: any) => void) {
     }
 
     /** listener parts */
-    function listener(data: IPayload<any>) {
+    function listener(data) {
         if (data.reply) {
             const key = getTransactionKey(data)
             if (transactions[key]) {
@@ -114,7 +100,7 @@ export function createMessager(sendHandler: (data: any) => void) {
                     reply(data, result, SUCCESS)
                 }
             } else {
-                reply(data, 'function ' + data.command + ' is not defined', FAIL)
+                reply(data, `function ${data.command} is not defined`, FAIL)
             }
         }
         eventBus.emitEvent('receive', data)
@@ -123,7 +109,7 @@ export function createMessager(sendHandler: (data: any) => void) {
 
 
     const __sync = bind(SYNC_COMMAND)
-    function _sync(defines: string[] = []) {
+    function _sync(defines = []) {
         defines.filter(d => !(d in fn))
             .map(d => {
                 fn[d] = bind(d)

@@ -16,7 +16,7 @@ export default class Test extends React.Component<any, any> {
         })
     }
     webWannaGet = () => this.state.value
-    webWannaSet = (data) => {
+    webWannaSet = (data: string) => {
         this.setState({
             status: `[Receive From Web] '${data}'`
         })

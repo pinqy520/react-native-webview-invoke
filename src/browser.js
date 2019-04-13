@@ -1,11 +1,9 @@
-// @flow
-
 import { createMessager } from './messager/index'
 
 const isBrowser = typeof window !== 'undefined'
 
 const { bind, define, listener, ready, fn, addEventListener, removeEventListener, isConnect } = createMessager(
-    (data: any) => { isBrowser && window.postMessage(JSON.stringify(data)) }
+    data => { isBrowser && window.postMessage(JSON.stringify(data)) }
 )
 
 if (isBrowser) {
@@ -15,7 +13,7 @@ if (isBrowser) {
     if (originalPostMessage) {
         ready()
     } else {
-        const descriptor: any = {
+        const descriptor = {
             get: function () {
                 return originalPostMessage
             },
