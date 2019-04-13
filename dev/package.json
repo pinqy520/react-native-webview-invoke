@@ -1,5 +1,5 @@
 {
-  "name": "RNWebViewMessager",
+  "name": "dev",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -7,16 +7,18 @@
     "test": "jest"
   },
   "dependencies": {
-    "react": "15.4.1",
-    "react-native": "0.38.0"
+    "react": "16.8.3",
+    "react-native": "0.59.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.3",
+    "@babel/runtime": "^7.4.3",
+    "babel-jest": "^24.7.1",
+    "jest": "^24.7.1",
+    "metro-react-native-babel-preset": "^0.53.1",
+    "react-test-renderer": "16.8.3"
   },
   "jest": {
     "preset": "react-native"
-  },
-  "devDependencies": {
-    "babel-jest": "17.0.2",
-    "babel-preset-react-native": "1.9.0",
-    "jest": "17.0.3",
-    "react-test-renderer": "15.4.1"
   }
 }

@@ -96,7 +96,16 @@ export function createMessager(sendHandler: (data: any) => void) {
     function listener(data: IPayload<any>) {
         if (data.reply) {
             const key = getTransactionKey(data)
-            transactions[key] && (data.status === SUCCESS ? transactions[key].resolve(data.data) : transactions[key].reject(data.data))
+            if (transactions[key]) {
+                switch (data.status) {
+                    case SUCCESS:
+                        transactions[key].resolve(data.data)
+                        break
+                    case FAIL:
+                        transactions[key].reject(data.data)
+                        break
+                }
+            }
         } else {
             if (callbacks[data.command]) {
                 const result = callbacks[data.command](data.data)
