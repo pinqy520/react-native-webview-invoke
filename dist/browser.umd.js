@@ -38,6 +38,11 @@
         return { addEventListener, removeEventListener, emitEvent }
     }
 
+    const SYNC_COMMAND = 'RNWV:sync';
+    const STATUS_SUCCESS = 'success';
+    const STATUS_FAIL = 'fail';
+    let _count = 0;
+
     class Deferred {
         constructor() {
             this.promise = new Promise((resolve, reject) => {
@@ -47,17 +52,14 @@
         }
     }
 
-    let count = 0;
-
-    function getUID() {
-        return count++
-    }
-
     const getTransactionKey = data => `${data.command}(${data.id})`;
 
-    const SYNC_COMMAND = 'RNWV:sync';
-    const SUCCESS = 'success';
-    const FAIL = 'fail';
+    const createPayload = (commond, data) => ({
+        id: _count++,
+        command, data,
+        reply: false,
+        status: STATUS_SUCCESS
+    });
 
     function createMessager(sendHandler) {
         let needWait = [];
@@ -100,9 +102,7 @@
         }
 
         function send(command, data) {
-            const payload = {
-                command, data, id: getUID(), reply: false
-            };
+            const payload = createPayload(command, data);
             const defer = new Deferred();
             transactions[getTransactionKey(payload)] = defer;
             sender(payload);
@@ -121,7 +121,7 @@
             if (data.reply) {
                 const key = getTransactionKey(data);
                 if (transactions[key]) {
-                    if (data.status === FAIL) {
+                    if (data.status === STATUS_FAIL) {
                         transactions[key].reject(data.data);
                     } else {
                         transactions[key].resolve(data.data);
@@ -132,13 +132,13 @@
                     const result = callbacks[data.command](data.data);
                     if (result && result.then) {
                         result
-                            .then(d => reply(data, d, SUCCESS))
-                            .catch(e => reply(data, e, FAIL));
+                            .then(d => reply(data, d, STATUS_SUCCESS))
+                            .catch(e => reply(data, e, STATUS_FAIL));
                     } else {
-                        reply(data, result, SUCCESS);
+                        reply(data, result, STATUS_SUCCESS);
                     }
                 } else {
-                    reply(data, `function ${data.command} is not defined`, FAIL);
+                    reply(data, `function ${data.command} is not defined`, STATUS_FAIL);
                 }
             }
             eventBus.emitEvent('receive', data);
