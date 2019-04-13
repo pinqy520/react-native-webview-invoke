@@ -8,12 +8,14 @@ export default (getWebview: () => any) => {
     )
     return {
         bind, define, fn,
-        listener: (e: any) => {
+        listener: (evt: any) => {
             let data: any
             try {
                 // FIX: webpack hotloader will triger this
-                data = JSON.parse(e.nativeEvent.data)
-            } catch (e) { }
+                data = JSON.parse(evt.nativeEvent.data)
+            } catch (e) {
+                __DEV__ && console.warn(e, data.nativeEvent.data)
+            }
             data && handler(data)
         },
         addEventListener, removeEventListener, isConnect

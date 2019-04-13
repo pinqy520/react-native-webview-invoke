@@ -97,25 +97,24 @@ export function createMessager(sendHandler: (data: any) => void) {
         if (data.reply) {
             const key = getTransactionKey(data)
             if (transactions[key]) {
-                switch (data.status) {
-                    case SUCCESS:
-                        transactions[key].resolve(data.data)
-                        break
-                    case FAIL:
-                        transactions[key].reject(data.data)
-                        break
+                if (data.status === FAIL) {
+                    transactions[key].reject(data.data)
+                } else {
+                    transactions[key].resolve(data.data)
                 }
             }
         } else {
             if (callbacks[data.command]) {
                 const result = callbacks[data.command](data.data)
                 if (result && result.then) {
-                    result.then(d => reply(data, d, SUCCESS)).catch(e => reply(data, e, FAIL))
+                    result
+                        .then(d => reply(data, d, SUCCESS))
+                        .catch(e => reply(data, e, FAIL))
                 } else {
                     reply(data, result, SUCCESS)
                 }
             } else {
-                reply(data, null, FAIL)
+                reply(data, 'function ' + data.command + ' is not defined', FAIL)
             }
         }
         eventBus.emitEvent('receive', data)
@@ -139,5 +138,10 @@ export function createMessager(sendHandler: (data: any) => void) {
     }
 
 
-    return { bind, define, listener, ready: sync, fn, addEventListener: eventBus.addEventListener, removeEventListener: eventBus.removeEventListener, isConnect }
+    return {
+        bind, define, listener, ready: sync, fn,
+        addEventListener: eventBus.addEventListener,
+        removeEventListener: eventBus.removeEventListener,
+        isConnect
+    }
 }

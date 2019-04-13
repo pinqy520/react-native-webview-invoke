@@ -36,6 +36,128 @@ function createEventBus() {
 
 // export const GlobalEventBus = createEventBus()
 
+var babelHelpers = {};
+
+
+
+
+var asyncGenerator = function () {
+  function AwaitValue(value) {
+    this.value = value;
+  }
+
+  function AsyncGenerator(gen) {
+    var front, back;
+
+    function send(key, arg) {
+      return new Promise(function (resolve, reject) {
+        var request = {
+          key: key,
+          arg: arg,
+          resolve: resolve,
+          reject: reject,
+          next: null
+        };
+
+        if (back) {
+          back = back.next = request;
+        } else {
+          front = back = request;
+          resume(key, arg);
+        }
+      });
+    }
+
+    function resume(key, arg) {
+      try {
+        var result = gen[key](arg);
+        var value = result.value;
+
+        if (value instanceof AwaitValue) {
+          Promise.resolve(value.value).then(function (arg) {
+            resume("next", arg);
+          }, function (arg) {
+            resume("throw", arg);
+          });
+        } else {
+          settle(result.done ? "return" : "normal", result.value);
+        }
+      } catch (err) {
+        settle("throw", err);
+      }
+    }
+
+    function settle(type, value) {
+      switch (type) {
+        case "return":
+          front.resolve({
+            value: value,
+            done: true
+          });
+          break;
+
+        case "throw":
+          front.reject(value);
+          break;
+
+        default:
+          front.resolve({
+            value: value,
+            done: false
+          });
+          break;
+      }
+
+      front = front.next;
+
+      if (front) {
+        resume(front.key, front.arg);
+      } else {
+        back = null;
+      }
+    }
+
+    this._invoke = send;
+
+    if (typeof gen.return !== "function") {
+      this.return = undefined;
+    }
+  }
+
+  if (typeof Symbol === "function" && Symbol.asyncIterator) {
+    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
+      return this;
+    };
+  }
+
+  AsyncGenerator.prototype.next = function (arg) {
+    return this._invoke("next", arg);
+  };
+
+  AsyncGenerator.prototype.throw = function (arg) {
+    return this._invoke("throw", arg);
+  };
+
+  AsyncGenerator.prototype.return = function (arg) {
+    return this._invoke("return", arg);
+  };
+
+  return {
+    wrap: function (fn) {
+      return function () {
+        return new AsyncGenerator(fn.apply(this, arguments));
+      };
+    },
+    await: function (value) {
+      return new AwaitValue(value);
+    }
+  };
+}();
+
+
+
+
+
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -94,6 +216,8 @@ var toConsumableArray = function (arr) {
   }
 };
 
+babelHelpers;
+
 var Deferred = function Deferred() {
     var _this = this;
 
@@ -116,6 +240,8 @@ var getTransactionKey = function getTransactionKey(data) {
 };
 
 var SYNC_COMMAND = 'RNWV:sync';
+var SUCCESS = 'success';
+var FAIL = 'fail';
 
 function createMessager(sendHandler) {
     var needWait = [];
@@ -177,9 +303,10 @@ function createMessager(sendHandler) {
         return defer.promise;
     }
 
-    function reply(data, result) {
+    function reply(data, result, status) {
         data.reply = true;
         data.data = result;
+        data.status = status;
         sender(data);
     }
 
@@ -187,19 +314,27 @@ function createMessager(sendHandler) {
     function listener(data) {
         if (data.reply) {
             var _key2 = getTransactionKey(data);
-            transactions[_key2] && transactions[_key2].resolve(data.data);
+            if (transactions[_key2]) {
+                if (data.status === FAIL) {
+                    transactions[_key2].reject(data.data);
+                } else {
+                    transactions[_key2].resolve(data.data);
+                }
+            }
         } else {
             if (callbacks[data.command]) {
                 var result = callbacks[data.command](data.data);
                 if (result && result.then) {
                     result.then(function (d) {
-                        return reply(data, d);
+                        return reply(data, d, SUCCESS);
+                    }).catch(function (e) {
+                        return reply(data, e, FAIL);
                     });
                 } else {
-                    reply(data, result);
+                    reply(data, result, SUCCESS);
                 }
             } else {
-                reply(data, null);
+                reply(data, 'function ' + data.command + ' is not defined', FAIL);
             }
         }
         eventBus.emitEvent('receive', data);
@@ -223,7 +358,12 @@ function createMessager(sendHandler) {
         __sync(Object.keys(callbacks)).then(_sync);
     }
 
-    return { bind: bind, define: define, listener: listener, ready: sync, fn: fn, addEventListener: eventBus.addEventListener, removeEventListener: eventBus.removeEventListener, isConnect: isConnect };
+    return {
+        bind: bind, define: define, listener: listener, ready: sync, fn: fn,
+        addEventListener: eventBus.addEventListener,
+        removeEventListener: eventBus.removeEventListener,
+        isConnect: isConnect
+    };
 }
 
 var native = (function (getWebview) {
@@ -240,12 +380,14 @@ var native = (function (getWebview) {
 
     return {
         bind: bind, define: define, fn: fn,
-        listener: function listener(e) {
+        listener: function listener(evt) {
             var data = void 0;
             try {
                 // FIX: webpack hotloader will triger this
-                data = JSON.parse(e.nativeEvent.data);
-            } catch (e) {}
+                data = JSON.parse(evt.nativeEvent.data);
+            } catch (e) {
+                __DEV__ && console.warn(e, data.nativeEvent.data);
+            }
             data && handler(data);
         },
         addEventListener: addEventListener, removeEventListener: removeEventListener, isConnect: isConnect

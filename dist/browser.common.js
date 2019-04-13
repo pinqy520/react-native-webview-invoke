@@ -38,11 +38,175 @@ function createEventBus() {
 
 // export const GlobalEventBus = createEventBus()
 
+var babelHelpers = {};
+
+
+
+
+var asyncGenerator = function () {
+  function AwaitValue(value) {
+    this.value = value;
+  }
+
+  function AsyncGenerator(gen) {
+    var front, back;
+
+    function send(key, arg) {
+      return new Promise(function (resolve, reject) {
+        var request = {
+          key: key,
+          arg: arg,
+          resolve: resolve,
+          reject: reject,
+          next: null
+        };
+
+        if (back) {
+          back = back.next = request;
+        } else {
+          front = back = request;
+          resume(key, arg);
+        }
+      });
+    }
+
+    function resume(key, arg) {
+      try {
+        var result = gen[key](arg);
+        var value = result.value;
+
+        if (value instanceof AwaitValue) {
+          Promise.resolve(value.value).then(function (arg) {
+            resume("next", arg);
+          }, function (arg) {
+            resume("throw", arg);
+          });
+        } else {
+          settle(result.done ? "return" : "normal", result.value);
+        }
+      } catch (err) {
+        settle("throw", err);
+      }
+    }
+
+    function settle(type, value) {
+      switch (type) {
+        case "return":
+          front.resolve({
+            value: value,
+            done: true
+          });
+          break;
+
+        case "throw":
+          front.reject(value);
+          break;
+
+        default:
+          front.resolve({
+            value: value,
+            done: false
+          });
+          break;
+      }
+
+      front = front.next;
+
+      if (front) {
+        resume(front.key, front.arg);
+      } else {
+        back = null;
+      }
+    }
+
+    this._invoke = send;
+
+    if (typeof gen.return !== "function") {
+      this.return = undefined;
+    }
+  }
+
+  if (typeof Symbol === "function" && Symbol.asyncIterator) {
+    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
+      return this;
+    };
+  }
+
+  AsyncGenerator.prototype.next = function (arg) {
+    return this._invoke("next", arg);
+  };
+
+  AsyncGenerator.prototype.throw = function (arg) {
+    return this._invoke("throw", arg);
+  };
+
+  AsyncGenerator.prototype.return = function (arg) {
+    return this._invoke("return", arg);
+  };
+
+  return {
+    wrap: function (fn) {
+      return function () {
+        return new AsyncGenerator(fn.apply(this, arguments));
+      };
+    },
+    await: function (value) {
+      return new AwaitValue(value);
+    }
+  };
+}();
+
+
+
+
+
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 var toConsumableArray = function (arr) {
   if (Array.isArray(arr)) {
@@ -53,6 +217,8 @@ var toConsumableArray = function (arr) {
     return Array.from(arr);
   }
 };
+
+babelHelpers;
 
 var Deferred = function Deferred() {
     var _this = this;
@@ -150,7 +316,13 @@ function createMessager(sendHandler) {
     function listener(data) {
         if (data.reply) {
             var _key2 = getTransactionKey(data);
-            transactions[_key2] && (data.status === SUCCESS ? transactions[_key2].resolve(data.data) : transactions[_key2].reject(data.data));
+            if (transactions[_key2]) {
+                if (data.status === FAIL) {
+                    transactions[_key2].reject(data.data);
+                } else {
+                    transactions[_key2].resolve(data.data);
+                }
+            }
         } else {
             if (callbacks[data.command]) {
                 var result = callbacks[data.command](data.data);
@@ -164,7 +336,7 @@ function createMessager(sendHandler) {
                     reply(data, result, SUCCESS);
                 }
             } else {
-                reply(data, null, FAIL);
+                reply(data, 'function ' + data.command + ' is not defined', FAIL);
             }
         }
         eventBus.emitEvent('receive', data);
@@ -188,7 +360,12 @@ function createMessager(sendHandler) {
         __sync(Object.keys(callbacks)).then(_sync);
     }
 
-    return { bind: bind, define: define, listener: listener, ready: sync, fn: fn, addEventListener: eventBus.addEventListener, removeEventListener: eventBus.removeEventListener, isConnect: isConnect };
+    return {
+        bind: bind, define: define, listener: listener, ready: sync, fn: fn,
+        addEventListener: eventBus.addEventListener,
+        removeEventListener: eventBus.removeEventListener,
+        isConnect: isConnect
+    };
 }
 
 var isBrowser = typeof window !== 'undefined';
@@ -206,31 +383,29 @@ var removeEventListener = _createMessager.removeEventListener;
 var isConnect = _createMessager.isConnect;
 
 if (isBrowser) {
-    (function () {
 
-        var originalPostMessage = window['originalPostMessage'];
+    var originalPostMessage = window['originalPostMessage'];
 
-        if (originalPostMessage) {
-            ready();
-        } else {
-            var descriptor = {
-                get: function get() {
-                    return originalPostMessage;
-                },
-                set: function set(value) {
-                    originalPostMessage = value;
-                    if (originalPostMessage) {
-                        setTimeout(ready, 50);
-                    }
+    if (originalPostMessage) {
+        ready();
+    } else {
+        var descriptor = {
+            get: function get() {
+                return originalPostMessage;
+            },
+            set: function set(value) {
+                originalPostMessage = value;
+                if (originalPostMessage) {
+                    setTimeout(ready, 50);
                 }
-            };
-            Object.defineProperty(window, 'originalPostMessage', descriptor);
-        }
+            }
+        };
+        Object.defineProperty(window, 'originalPostMessage', descriptor);
+    }
 
-        window.document.addEventListener('message', function (e) {
-            return listener(JSON.parse(e.data));
-        });
-    })();
+    window.document.addEventListener('message', function (e) {
+        return listener(JSON.parse(e.data));
+    });
 }
 
 var browser = {

@@ -3,7 +3,7 @@ import * as React from 'react'
 import { View, Text, TextInput, TouchableOpacity, WebView, AppRegistry } from 'react-native'
 import createInvoke from './native.js'
 
-class Test extends React.Component {
+export default class Test extends React.Component<any, any> {
     state = {
         status: '[Ready] Waiting For WebView Ready',
         value: ''
@@ -35,6 +35,10 @@ class Test extends React.Component {
         await this.invoke.fn.set(this.state.value)
         this.setState({ status: '[Set To Web] Success' })
     }
+    _onMessage = (e: any) => {
+        console.warn(e.nativeEvent.data)
+        this.invoke.listener(e)
+    }
     componentDidMount() {
         this.invoke
             .define('init', this.webInitialize)
@@ -44,11 +48,11 @@ class Test extends React.Component {
     renderWebSide() {
         return (
             <View style={styles.webviewArea}>
-                <WebView
+                <WebView useWebKit
                     ref={webview => this.webview = webview}
-                    onMessage={this.invoke.listener}
+                    onMessage={this._onMessage}
                     source={require('./index.html')}
-                    />
+                />
             </View>
         )
     }
@@ -95,8 +99,6 @@ const styles = {
         textAlign: 'center'
     },
     input: {
-        height: 30,
-        lineHeight: 30,
         margin: 5,
         padding: 5,
         borderColor: '#000',
@@ -126,6 +128,3 @@ const styles = {
         borderStyle: 'solid'
     }
 }
-
-
-AppRegistry.registerComponent('RNWebViewMessager', () => Test);

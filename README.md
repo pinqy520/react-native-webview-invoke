@@ -40,6 +40,8 @@ Requires：
 
 - React Native >= 0.37
 
+Note: add 'useWebKit' property for rn > 0.59
+
 ## Run Demo
 
 ```
@@ -69,7 +71,7 @@ class SomePage extends React.Component {
     webview: WebView
     invoke = createInvoke(() => this.webview)
     render() {
-        return <Webview
+        return <Webview useWebKit
             ref={webview => this.webview = webview}
             onMessage={this.invoke.listener}
             source={require('./index.html')}

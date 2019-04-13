@@ -10,7 +10,6 @@
     ]
   ],
   "plugins": [
-    "transform-flow-strip-types",
-    "external-helpers"
+    "transform-flow-strip-types"
   ]
 }
