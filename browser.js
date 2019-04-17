@@ -1,1 +1,3 @@
-module.exports.default = require('./dist/browser.common.js')
+var mod = require('./dist/browser.common.js')
+module.exports = mod
+module.exports.default = mod
