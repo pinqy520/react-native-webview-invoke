@@ -176,7 +176,7 @@ var native = getWebview => {
                 // FIX: webpack hotloader will triger this
                 data = JSON.parse(evt.nativeEvent.data);
             } catch (e) {
-                __DEV__ && console.warn(e, data.nativeEvent.data);
+                __DEV__ && console.warn(e.message, evt.nativeEvent.data);
             }
             data && handler(data);
         },
