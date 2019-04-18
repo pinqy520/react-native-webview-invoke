@@ -50,7 +50,7 @@ class Deferred {
 
 const getTransactionKey = data => `${data.command}(${data.id})`;
 
-const createPayload = (commond, data) => ({
+const createPayload = (command, data) => ({
     id: _count++,
     command, data,
     reply: false,
