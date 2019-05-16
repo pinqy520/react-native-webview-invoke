@@ -1,6 +1,11 @@
 // @flow
 import * as React from 'react'
-import { View, Text, TextInput, TouchableOpacity, WebView, AppRegistry } from 'react-native'
+import {
+    View, Text, TextInput, TouchableOpacity,
+    // WebView,
+    AppRegistry
+} from 'react-native'
+import { WebView } from 'react-native-webview';
 import createInvoke from './native.js'
 
 export default class Test extends React.Component<any, any> {
@@ -48,7 +53,7 @@ export default class Test extends React.Component<any, any> {
     renderWebSide() {
         return (
             <View style={styles.webviewArea}>
-                <WebView useWebKit
+                <WebView
                     ref={webview => this.webview = webview}
                     onMessage={this._onMessage}
                     source={require('./index.html')}
