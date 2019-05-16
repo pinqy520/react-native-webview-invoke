@@ -40,8 +40,6 @@ Requires：
 
 - React Native >= 0.37
 
-> Note: add 'useWebKit' property for rn > 0.59
-
 ## Basic Usage
 
 There are two sides: native and web.
