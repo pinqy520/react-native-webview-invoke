@@ -1,8 +1,9 @@
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-    typeof define === 'function' && define.amd ? define(factory) :
-    (global = global || self, global.WebViewInvoke = factory());
-}(this, function () { 'use strict';
+        typeof define === 'function' && define.amd ? define(factory) :
+            (global = global || self, global.WebViewInvoke = factory());
+}(this, function () {
+    'use strict';
 
     function createEventBus() {
         const listeners = {
@@ -65,7 +66,7 @@
         let needWait = [];
         const eventBus = createEventBus();
         const transactions = {};
-        const callbacks = {}; // 
+        const callbacks = {}; //
         const fn = {}; // all other side functions
 
         function isConnect() { return !needWait }
@@ -226,8 +227,10 @@
 
         // onMessage react native
         window.document.addEventListener('message', e => originalPostMessage && listener(JSON.parse(e.data)));
-        // onMessage react-native-webview 
+        // onMessage react-native-webview
         window.addEventListener('message', e => ReactNativeWebView && listener(JSON.parse(e.data)));
+        // onMessage react-native-webview  with android
+        document.addEventListener('message', e => ReactNativeWebView && listener(JSON.parse(e.data)));
 
     }
 
