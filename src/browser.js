@@ -58,6 +58,8 @@ if (isBrowser) {
     window.document.addEventListener('message', e => originalPostMessage && listener(JSON.parse(e.data)))
     // onMessage react-native-webview 
     window.addEventListener('message', e => ReactNativeWebView && listener(JSON.parse(e.data)))
+    // onMessage react-native-webview  with android
+    window.document.addEventListener('message', e => ReactNativeWebView && listener(JSON.parse(e.data)));
 
 }
 
