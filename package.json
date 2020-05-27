@@ -39,10 +39,13 @@
   "homepage": "https://github.com/pinqy520/react-native-webview-invoke#readme",
   "dependencies": {},
   "devDependencies": {
-    "concurrently": "^4.0.0",
-    "http-server": "^0.12.0",
-    "rollup": "^1.0.0",
-    "rollup-plugin-commonjs": "^9.2.0",
-    "rollup-plugin-node-resolve": "^4.0.0"
+    "@babel/core": "^7.10.0",
+    "@babel/preset-env": "^7.10.0",
+    "concurrently": "^5.0.0",
+    "http-server": "^0.12.3",
+    "rollup": "^2.0.0",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-commonjs": "^10.0.0",
+    "rollup-plugin-node-resolve": "^5.0.0"
   }
 }
