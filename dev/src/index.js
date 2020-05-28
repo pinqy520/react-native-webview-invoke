@@ -184,7 +184,7 @@ const html = `
     <script src="https://tb1.bdstatic.com/tb/libs/rnwi-browser.js"></script>
     -->
     <! --  change the 172.20.10.2:8080  with your static server adress -->
-    <script src="http://192.168.0.105:8080/browser.umd.js?id=3"></script>
+    <script src="http://127.0.0.1:8080/browser.umd.js?id=3"></script>
 
     <script>
         (function () {

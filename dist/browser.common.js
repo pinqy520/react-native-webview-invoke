@@ -1,5 +1,21 @@
 'use strict';
 
+function _typeof(obj) {
+  "@babel/helpers - typeof";
+
+  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+    _typeof = function (obj) {
+      return typeof obj;
+    };
+  } else {
+    _typeof = function (obj) {
+      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    };
+  }
+
+  return _typeof(obj);
+}
+
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -229,6 +245,28 @@ var _createMessager = createMessager(function (data) {
     addEventListener = _createMessager.addEventListener,
     removeEventListener = _createMessager.removeEventListener,
     isConnect = _createMessager.isConnect;
+/*Handle only the messages which are of structure rn-webview-invoke.
+Ignore messages which came from other sources.
+
+Ex: In case of vimeo player, vimeo player will throw some self messages.
+These messages need to be ignored*/
+
+
+var handleMessage = function handleMessage(message) {
+  var jsonMessage = undefined;
+
+  if (_typeof(message) === 'object') {
+    jsonMessage = message;
+  } else if (typeof message === 'string') {
+    try {
+      jsonMessage = JSON.parse(message);
+    } catch (error) {}
+  }
+
+  if (jsonMessage && (jsonMessage.command || jsonMessage.reply)) {
+    listener(jsonMessage);
+  }
+};
 
 if (isBrowser) {
   // react-native
@@ -299,15 +337,15 @@ if (isBrowser) {
 
 
   window.document.addEventListener('message', function (e) {
-    return originalPostMessage && listener(JSON.parse(e.data));
+    return originalPostMessage && handleMessage(e.data);
   }); // onMessage react-native-webview 
 
   window.addEventListener('message', function (e) {
-    return ReactNativeWebView && listener(JSON.parse(e.data));
+    return ReactNativeWebView && handleMessage(e.data);
   }); // onMessage react-native-webview  with android
 
   window.document.addEventListener('message', function (e) {
-    return ReactNativeWebView && listener(JSON.parse(e.data));
+    return ReactNativeWebView && handleMessage(e.data);
   });
 }
 
