@@ -76,7 +76,7 @@ function createMessager(sendHandler) {
   }
 
   function define(name, func) {
-    callbacks[name] = func;
+    callbacks[name] = args => func(...args);
     !needWait && sync();
     return { define, bind };
   }
